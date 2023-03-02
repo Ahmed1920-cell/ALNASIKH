@@ -42,6 +42,8 @@ dependencies:
   syncfusion_flutter_pdf: ^20.4.52
   path_provider: ^2.0.7
   open_file: ^3.2.1
+  url_launcher: ^6.1.10
+  dio: ^5.0.1
 
 dev_dependencies:
   flutter_test:

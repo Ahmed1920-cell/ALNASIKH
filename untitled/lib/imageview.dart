@@ -5,10 +5,13 @@ import 'package:async/async.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:dio/dio.dart';
 class imageView extends StatefulWidget {
   imageView({super.key, required this.imagePath,required this.ip});
   final imagePath;
@@ -88,7 +91,7 @@ class _imageViewState extends State<imageView> {
                   Text(
                       chr,
                       style: TextStyle(
-                          fontSize: 40,
+                          fontSize: 20,
                           color: Colors.white),
                       textAlign: TextAlign.right
                   ),
@@ -105,9 +108,9 @@ class _imageViewState extends State<imageView> {
                       )
                   ),
                   ElevatedButton(
-                      onPressed: (){
-                        _createPDF(chr);
-                      },
+                  onPressed: didDownloadPDF ? null : () async {
+    var tempDir = await getTemporaryDirectory();
+    download(Dio(), "http://$IP:5000/return_PDF", tempDir.path + "/aaa.pdf");},
                       child: Text("PDF",style: TextStyle(
                           color: Colors.white
                       )
@@ -119,44 +122,47 @@ class _imageViewState extends State<imageView> {
       ),
     ));
   }
-  Future<void> _createPDF(String sentance) async {
-    //Create a new PDF document
-    PdfDocument document = PdfDocument();
 
-    //Add a new page and draw text
-    PdfFont font =  PdfTrueTypeFont(await _readFontData(), 20);
-    document.pages.add().graphics.drawString(
-        sentance, font,
-        brush: PdfSolidBrush(PdfColor(0, 0, 0)),
-        bounds: Rect.fromLTWH(0, 0, 500, 50),
-        format: PdfStringFormat(textDirection: PdfTextDirection.rightToLeft, alignment: PdfTextAlignment.right, paragraphIndent: 35));
+  double progress = 0;
 
-    //Save the document
-    List<int> bytes = await document.save();
+  // Track if the PDF was downloaded here.
+  bool didDownloadPDF = false;
 
-    //Dispose the document
-    document.dispose();
+  // Show the progress status to the user.
+  String progressString = 'File has not been downloaded yet.';
+  void updateProgress(done, total) {
+    progress = done / total;
+    setState(() {
+      if (progress >= 1) {
+        progressString = '✅ File has finished downloading. Try opening the file.';
+        didDownloadPDF = true;
+      } else {
+        progressString = 'Download progress: ' + (progress * 100).toStringAsFixed(0) + '% done.';
+      }
+    });
+  }
+  Future download(Dio dio, String url, String savePath) async {
+    try {
+      Response response = await dio.get(
+        url,
+        onReceiveProgress: updateProgress,
+        options: Options(
+            responseType: ResponseType.bytes,
+            followRedirects: false,
+            validateStatus: (status) { return status! < 500; }
+        ),
+      );
+      var file = File(savePath).openSync(mode: FileMode.write);
+      print(savePath);
+      file.writeFromSync(response.data);
+      OpenFile.open(savePath);
 
-    //Get external storage directory
-    final directory = await getApplicationSupportDirectory();
-
-//Get directory path
-    final path = directory.path;
-
-//Create an empty file to write PDF data
-    File file = File('$path/Output.pdf');
-
-//Write PDF data
-    await file.writeAsBytes(bytes, flush: true);
-
-//Open the PDF document in mobile
-    OpenFile.open('$path/Output.pdf');
-
-
+      // Here, you're catching an error and printing it. For production
+      // apps, you should display the warning to the user and give them a
+      // way to restart the download.
+    } catch (e) {
+      print(e);
+    }
   }
 
-  Future<List<int>> _readFontData() async {
-    final ByteData bytes = await rootBundle.load('assets/Regular.ttf');
-    return bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes);
-  }
 }
