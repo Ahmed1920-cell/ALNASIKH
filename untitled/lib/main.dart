@@ -4,6 +4,8 @@ import 'package:document_scanner_flutter/document_scanner_flutter.dart';
 import 'package:document_scanner_flutter/configs/configs.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled/IP.dart';
+import 'newplash.dart';
+import 'splash.dart';
 import 'imageview.dart';
 import 'package:advance_pdf_viewer/advance_pdf_viewer.dart';
 
@@ -22,7 +24,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage("192.168.1.1"),
+      home: splashScreen(),
       //home: ip(),
     );
   }

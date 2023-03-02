@@ -81,43 +81,46 @@ class _imageViewState extends State<imageView> {
         body: Container(
           color: Colors.black,
           child: Center(
-              child: Column(
-                children: [
-                  Image.file(
-                    imageFile,
-                    width: 400,
-                    height: 400,
-                  ),
-                  Text(
-                      chr,
-                      style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.white),
-                      textAlign: TextAlign.right
-                  ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                      onPressed: (){
-                        Clipboard.setData(ClipboardData(text: chr));
-                      },
-                      child: Text("Copy",style: TextStyle(
-                          color: Colors.white
-                      )
-                      )
-                  ),
-                  ElevatedButton(
-                  onPressed: didDownloadPDF ? null : () async {
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Image.file(
+                      imageFile,
+                      width: 400,
+                      height: 400,
+                    ),
+                    Text(
+                        chr,
+                        style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white),
+                        textAlign: TextAlign.right
+                    ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                        onPressed: (){
+                          Clipboard.setData(ClipboardData(text: chr));
+                        },
+                        child: Text("Copy",style: TextStyle(
+                            color: Colors.white
+                        )
+                        )
+                    ),
+                    SizedBox(width: 10),
+                    ElevatedButton(
+                    onPressed:() async {
     var tempDir = await getTemporaryDirectory();
     download(Dio(), "http://$IP:5000/return_PDF", tempDir.path + "/aaa.pdf");},
-                      child: Text("PDF",style: TextStyle(
-                          color: Colors.white
-                      )
-                      )
-                  ),
-                ],
-              )]),
+                        child: Text("PDF",style: TextStyle(
+                            color: Colors.white
+                        )
+                        )
+                    ),
+                  ],
+                )]),
+              ),
         ),
       ),
     ));
