@@ -1,3 +1,4 @@
+/*
 import 'package:flutter/material.dart';
 
 import 'main.dart';
@@ -33,3 +34,4 @@ class _SplashState extends State<Splash> {
   }
 }
 
+*/

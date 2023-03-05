@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import 'main.dart';
 
 class ip extends StatelessWidget {
-  ip(this.I);
+  ip(this.I,this.done);
   final I;
+  final done;
   final _textController = TextEditingController();
   send_ip(BuildContext ctx, String IP) {
 Navigator.push(ctx, MaterialPageRoute(builder: (_){
-  return MyHomePage(IP);
+  return MyHomePage(IP,done,"");
 }));
   }
 

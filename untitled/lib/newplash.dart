@@ -12,11 +12,13 @@ class splashScreen extends StatelessWidget {
     return Scaffold(
 
         body: AnimatedSplashScreen(
+          splashIconSize: 200,
             duration: 3000,
-            splash: Image.asset('assets/ic_launcher.png'),
-            nextScreen: MyHomePage("192.168.1.1"),
-            splashTransition: SplashTransition.fadeTransition,
+            splash: Image.asset('assets/ic_launcher.png',width: 1000,
+              height: 1000,),
+            nextScreen: MyHomePage("192.168.1.1",false,""),
+            splashTransition: SplashTransition.scaleTransition,
             // pageTransitionType: PageTransitionType.scale,
-            backgroundColor: Color.fromRGBO(96, 125, 139, 1)));
+            backgroundColor: Colors.black));
   }
 }

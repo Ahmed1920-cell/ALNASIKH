@@ -13,25 +13,26 @@ import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 
+import 'main.dart';
+
 class imageView extends StatefulWidget {
   imageView({super.key, required this.imagePath, required this.ip});
 
   final imagePath;
   final ip;
-
   @override
   State<imageView> createState() => _imageViewState(imagePath, ip);
 }
 
 class _imageViewState extends State<imageView> {
   _imageViewState(this.imageFile, this.IP);
-
+  bool done=false;
+String pdf_path="";
   final IP;
   var chr = "";
   int n = 0;
   final imageFile;
   bool NotCopy = true;
-
   ocr() async {
     var stream =
         new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
@@ -135,13 +136,30 @@ class _imageViewState extends State<imageView> {
                                       MaterialStatePropertyAll(Colors.blue)),
                           onPressed: NotCopy?(){}:() async {
                             var tempDir = await getTemporaryDirectory();
-                            download(Dio(), "http://$IP:5000/return_PDF",
+                            await download(Dio(), "http://$IP:5000/return_PDF",
                                 tempDir.path + "/aaa.pdf");
                           },
                           child: Text("PDF",
                               style: TextStyle(color: Colors.white))),
                     ],
-                  )
+                  ),
+                  ElevatedButton(
+                      style: NotCopy
+                          ? ButtonStyle(
+                          backgroundColor:
+                          MaterialStatePropertyAll(Colors.grey),
+                        minimumSize: MaterialStatePropertyAll(Size.fromHeight(50)))
+                          : ButtonStyle(
+                          backgroundColor:
+                          MaterialStatePropertyAll(Colors.blue),
+                          minimumSize: MaterialStatePropertyAll(Size.fromHeight(50))),
+                      onPressed: NotCopy?(){}:() {
+                        Navigator.push(context, MaterialPageRoute(builder: (_){
+                          return MyHomePage(IP,done,pdf_path);
+                        }));
+                      },
+                      child: Text("Done",
+                          style: TextStyle(color: Colors.white))),
                 ]),
               ),
             ),
@@ -188,7 +206,10 @@ class _imageViewState extends State<imageView> {
       print(savePath);
       file.writeFromSync(response.data);
       OpenFile.open(savePath);
-
+      setState(() {
+        done=true;
+        pdf_path=savePath;
+      });
       // Here, you're catching an error and printing it. For production
       // apps, you should display the warning to the user and give them a
       // way to restart the download.
