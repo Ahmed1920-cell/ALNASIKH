@@ -29,6 +29,7 @@ class _imageViewState extends State<imageView> {
   bool done=false;
 String pdf_path="";
   final IP;
+  double font=18;
   var chr = "";
   int n = 0;
   final imageFile;
@@ -91,23 +92,61 @@ String pdf_path="";
             child: Center(
               child: SingleChildScrollView(
                 child: Column(children: [
-                  Image.file(
-                    imageFile,
-                    width: 400,
-                    height: 400,
+                  Container(
+                    padding: EdgeInsets.all(8),
+                    //color: Colors.red,
+                    height: 200,
+                    child: Image.file(
+                      imageFile,
+                      width: 400,
+                      height: 600,
+                    ),
                   ),
                   Container(
                     decoration: BoxDecoration(
                       //border:Border.all(color: Colors.grey,width: 5),
                       borderRadius: BorderRadius.circular(25),
-                      color: Colors.grey
+                      color: chr==""?null:Colors.grey
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(chr,
-                          style: TextStyle(fontSize: 25, color: Colors.black,fontWeight: FontWeight.bold),
+                          style: TextStyle(fontSize: font, color: Colors.black,fontWeight: FontWeight.bold),
                           textAlign: TextAlign.right),
                     ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            if (font > 12) {
+                              font -= 1;
+                            }
+                          });
+                        },
+                        child: Icon(Icons.remove, color: Colors.white),
+                        style: ElevatedButton.styleFrom(
+                          shape: CircleBorder(),
+                          backgroundColor: font>12&&!NotCopy?Colors.blue:Colors.grey
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            if (font < 26) {
+                              font += 1;
+                            }
+                          });
+                        },
+                        child: Icon(Icons.add, color: Colors.white),
+                        style: ElevatedButton.styleFrom(
+                          shape: CircleBorder(),
+                            backgroundColor: font<26&&!NotCopy?Colors.blue:Colors.grey
+                        ),
+                      ),
+                    ],
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
