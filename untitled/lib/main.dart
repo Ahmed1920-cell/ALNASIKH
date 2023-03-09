@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:pdf_render/pdf_render.dart';
 import 'package:document_scanner_flutter/document_scanner_flutter.dart';
 import 'package:document_scanner_flutter/configs/configs.dart';
 import 'package:flutter/material.dart';
@@ -8,8 +8,23 @@ import 'package:untitled/IP.dart';
 import 'newplash.dart';
 import 'splash.dart';
 import 'imageview.dart';
+import 'package:image/image.dart' as img;
+import 'package:file_picker/file_picker.dart';
 import 'package:advance_pdf_viewer/advance_pdf_viewer.dart';
+Future<File?> pickPdfFile() async {
+  final result = await FilePicker.platform.pickFiles(
+    type: FileType.custom,
+    allowedExtensions: ['pdf'],
+  );
 
+  if (result != null) {
+    print("upload");
+    return File(result.files.single.path!);
+  } else {
+    // User canceled the picker
+    return null;
+  }
+}
 void main() {
   runApp(MyApp());
 }
@@ -54,9 +69,9 @@ class _MyHomePageState extends State<MyHomePage> {
   File? _scannedImage;
 
   openImageScanner(BuildContext context, String IP) async {
-    var image = await DocumentScannerFlutter.launch(context,
+    var image = await DocumentScannerFlutter.launch(IP,context
         //source: ScannerFileSource.CAMERA,
-        labelsConfig: {
+        ,labelsConfig: {
           ScannerLabelsConfig.ANDROID_NEXT_BUTTON_LABEL: "Next Step",
           ScannerLabelsConfig.ANDROID_OK_LABEL: "OK"
         });
@@ -123,7 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
         //alignment: Alignment.center,
         child: Column(
           children: [
-            !Done ?Container(
+           !Done ?Container(
                 width: double.infinity,
                 height: 580,
                 decoration: BoxDecoration(

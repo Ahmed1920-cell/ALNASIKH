@@ -35,6 +35,7 @@ String pdf_path="";
   final imageFile;
   bool NotCopy = true;
   ocr() async {
+    var path=imageFile.path;
     var stream =
         new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
     // get file length
@@ -96,11 +97,14 @@ String pdf_path="";
                     padding: EdgeInsets.all(8),
                     //color: Colors.red,
                     height: 200,
-                    child: Image.file(
+                    child: /*Image.file(
                       imageFile,
                       width: 400,
                       height: 600,
-                    ),
+                    ),*/
+                    RawImage(image: imageFile, fit: BoxFit.contain)
+                    //imageFile
+                    //Image(image: MemoryImage(imageFile),)
                   ),
                   Container(
                     decoration: BoxDecoration(
