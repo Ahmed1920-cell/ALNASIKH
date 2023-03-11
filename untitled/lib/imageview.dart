@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:async/async.dart';
 import 'dart:io';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -35,7 +37,6 @@ String pdf_path="";
   final imageFile;
   bool NotCopy = true;
   ocr() async {
-    var path=imageFile.path;
     var stream =
         new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
     // get file length
@@ -77,7 +78,6 @@ String pdf_path="";
       print(str);
     });
   }
-
   @override
   Widget build(BuildContext context) {
     if (n == 0) ocr();
@@ -97,12 +97,12 @@ String pdf_path="";
                     padding: EdgeInsets.all(8),
                     //color: Colors.red,
                     height: 200,
-                    child: /*Image.file(
+                    child: Image.file(
                       imageFile,
                       width: 400,
                       height: 600,
-                    ),*/
-                    RawImage(image: imageFile, fit: BoxFit.contain)
+                    ),
+                    //RawImage(image: imageFile, fit: BoxFit.contain)
                     //imageFile
                     //Image(image: MemoryImage(imageFile),)
                   ),
@@ -116,7 +116,7 @@ String pdf_path="";
                       padding: const EdgeInsets.all(8.0),
                       child: Text(chr,
                           style: TextStyle(fontSize: font, color: Colors.black,fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.right),
+                          textAlign: TextAlign.right,textDirection: TextDirection.rtl,),
                     ),
                   ),
                   Row(
