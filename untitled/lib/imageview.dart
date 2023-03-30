@@ -86,7 +86,7 @@ String pdf_path="";
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           appBar: AppBar(
-            title: Text('image view'),
+            title: Text('OCR Output'),
           ),
           body: Container(
             color: Colors.black,

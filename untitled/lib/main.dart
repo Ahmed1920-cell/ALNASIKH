@@ -124,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return DefaultTabController(length: 2, child:
     Scaffold(
       appBar: AppBar(
-        title: Text("Arabic OCR"),
+        title: Text("Annassekh App"),
         actions: [
           IconButton(onPressed: () {
             Navigator.push(context,
@@ -143,12 +143,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 height: 580,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(30),
-                    color: Colors.grey
+                    //color: Colors.grey
                 ),
-                child: Center(child: Text("Recent Document",
+                child: Center(child: Text("Recent Documents",
                   style: TextStyle(fontSize: 23,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black),))) :
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white),))) :
                 Container(
                   padding: EdgeInsets.all(8),
                   width: double.infinity
