@@ -5,7 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as ui;
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:untitled/black.dart';
+import 'package:ALNASIKH/black.dart';
 class crop extends StatefulWidget {
   final image;
   final ip;

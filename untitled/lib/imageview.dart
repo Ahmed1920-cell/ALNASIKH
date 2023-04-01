@@ -86,7 +86,10 @@ String pdf_path="";
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           appBar: AppBar(
+           // backgroundColor: Color.fromRGBO(13, 64, 181, 1),
             title: Text('OCR Output'),
+            elevation: 0,
+
           ),
           body: Container(
             color: Colors.black,
@@ -97,10 +100,11 @@ String pdf_path="";
                     padding: EdgeInsets.all(8),
                     //color: Colors.red,
                     height: 200,
+                    width: 400,
                     child: Image.file(
                       imageFile,
+                      height: 200,
                       width: 400,
-                      height: 600,
                     ),
                     //RawImage(image: imageFile, fit: BoxFit.contain)
                     //imageFile
@@ -110,13 +114,51 @@ String pdf_path="";
                     decoration: BoxDecoration(
                       //border:Border.all(color: Colors.grey,width: 5),
                       borderRadius: BorderRadius.circular(25),
-                      color: chr==""?null:Colors.grey
+                      color: chr==""?null:Color.fromRGBO(141, 160, 186, 0.5),
+                       //Colors.grey.withOpacity(0.3)
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(chr,
-                          style: TextStyle(fontSize: font, color: Colors.black,fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.right,textDirection: TextDirection.rtl,),
+                    child: chr==""?CircularProgressIndicator():Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SelectableText(chr,
+                              style: TextStyle(fontSize: font, color: Colors.white,fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.right,textDirection: TextDirection.rtl,),
+                        ),
+                        if (!NotCopy)  Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              style: NotCopy
+                                  ? ButtonStyle(
+                                  backgroundColor:
+                                  MaterialStatePropertyAll(Colors.grey))
+                                  : ButtonStyle(
+                                  backgroundColor:
+                                  MaterialStatePropertyAll(Colors.blue)),
+                              onPressed: NotCopy?(){}:() {
+                                Clipboard.setData(ClipboardData(text: chr));
+                              },
+                              icon: Icon(Icons.copy,color: Colors.white,),
+                            ),
+                            SizedBox(width: 10),
+                            IconButton(
+                              style: NotCopy
+                                  ? ButtonStyle(
+                                  backgroundColor:
+                                  MaterialStatePropertyAll(Colors.grey))
+                                  : ButtonStyle(
+                                  backgroundColor:
+                                  MaterialStatePropertyAll(Colors.blue)),
+                              onPressed: NotCopy?(){}:() async {
+                                var tempDir = await getTemporaryDirectory();
+                                await download(Dio(), "http://$IP:5000/return_PDF",
+                                    tempDir.path + "/aaa.pdf");
+                              },
+                              icon: Image.asset("assets/landing-pdf-converter.png",width: 150,height: 150,),),
+                          ],
+                        ) ,
+                      ],
                     ),
                   ),
                   Row(
@@ -152,62 +194,22 @@ String pdf_path="";
                       ),
                     ],
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton(
-                          style: NotCopy
-                              ? ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStatePropertyAll(Colors.grey))
-                              : ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStatePropertyAll(Colors.blue)),
-                          onPressed: NotCopy?(){}:() {
-                            Clipboard.setData(ClipboardData(text: chr));
-                          },
-                          child: Text("Copy",
-                              style: TextStyle(color: Colors.white))),
-                      SizedBox(width: 10),
-                      ElevatedButton(
-                        style: NotCopy
-                              ? ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStatePropertyAll(Colors.grey))
-                              : ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStatePropertyAll(Colors.blue)),
-                          onPressed: NotCopy?(){}:() async {
-                            var tempDir = await getTemporaryDirectory();
-                            await download(Dio(), "http://$IP:5000/return_PDF",
-                                tempDir.path + "/aaa.pdf");
-                          },
-                          child: Text("PDF",
-                              style: TextStyle(color: Colors.white))),
-                    ],
-                  ),
-                  ElevatedButton(
-                      style: NotCopy
-                          ? ButtonStyle(
-                          backgroundColor:
-                          MaterialStatePropertyAll(Colors.grey),
-                        minimumSize: MaterialStatePropertyAll(Size.fromHeight(50)))
-                          : ButtonStyle(
-                          backgroundColor:
-                          MaterialStatePropertyAll(Colors.blue),
-                          minimumSize: MaterialStatePropertyAll(Size.fromHeight(50))),
-                      onPressed: NotCopy?(){}:() {
-                        Navigator.push(context, MaterialPageRoute(builder: (_){
-                          return MyHomePage(IP,done,pdf_path);
-                        }));
-                      },
-                      child: Text("Done",
-                          style: TextStyle(color: Colors.white))),
                 ]),
               ),
             ),
           ),
-        ));
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: NotCopy
+                ?Colors.grey:Colors.green,
+              onPressed: NotCopy?(){}:() {
+                Navigator.push(context, MaterialPageRoute(builder: (_){
+                  return MyHomePage(IP,done,pdf_path);
+                }));
+              },
+              child: Icon(Icons.done_outline,
+              color: Colors.black,))
+          ),
+        );
   }
 
   double progress = 0;

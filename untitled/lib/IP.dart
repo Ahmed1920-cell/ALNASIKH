@@ -8,7 +8,7 @@ class ip extends StatelessWidget {
   final done;
   final _textController = TextEditingController();
   send_ip(BuildContext ctx, String IP) {
-Navigator.push(ctx, MaterialPageRoute(builder: (_){
+Navigator.pushReplacement(ctx, MaterialPageRoute(builder: (_){
   return MyHomePage(IP,done,"");
 }));
   }
