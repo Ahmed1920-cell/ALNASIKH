@@ -14,7 +14,7 @@ class splashScreen extends StatelessWidget {
         body: AnimatedSplashScreen(
           splashIconSize: 200,
             duration: 3000,
-            splash: Image.asset('assets/ic_launcher.png',width: 1000,
+            splash: Image.asset('assets/icons/play_store.png',width: 1000,
               height: 1000,),
             nextScreen: MyHomePage("192.168.1.1",false,""),
             splashTransition: SplashTransition.scaleTransition,
