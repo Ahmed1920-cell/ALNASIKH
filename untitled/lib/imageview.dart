@@ -17,6 +17,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 
 import 'main.dart';
+import 'sql.dart';
 
 class imageView extends StatefulWidget {
   imageView({super.key, required this.imagePath, required this.ip});
@@ -28,6 +29,7 @@ class imageView extends StatefulWidget {
 }
 
 class _imageViewState extends State<imageView> {
+  Sql DB=Sql();
   _imageViewState(this.imageFile, this.IP);
   bool done=false;
 String pdf_path="";
@@ -225,6 +227,13 @@ String pdf_path="";
             backgroundColor: NotCopy
                 ?Colors.grey:Colors.green,
               onPressed: NotCopy?(){}:() {
+              DB.insert("alnasikh",{
+                "filename":"ahmed",
+                "PdfPath":pdf_path,
+                "ImagePath":imageFile.toString(),
+                "DATE":"2023-4-15"
+              }
+              );
                 Navigator.push(context, MaterialPageRoute(builder: (_){
                   return MyHomePage(IP,done,pdf_path);
                 }));

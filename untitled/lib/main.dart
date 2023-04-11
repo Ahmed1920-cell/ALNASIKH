@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:ALNASIKH/Pdf%20Scan.dart';
+import 'package:ALNASIKH/sql.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf_render/pdf_render.dart';
 import 'package:document_scanner_flutter/document_scanner_flutter.dart';
@@ -75,7 +76,18 @@ class _MyHomePageState extends State<MyHomePage> {
   final pdf_path;
 
   _MyHomePageState(this.IP, this.Done, this.pdf_path);
+  List data=[];
+Sql DB=Sql();
+readData() async{
+  List<Map> response=await DB.read("alnasikh");
+  data.addAll(response);
+  if (this.mounted){
+    setState(() {
 
+    });
+  }
+  print(data.length);
+}
   bool isCamera = false;
   double r = 0;
   File? _scannedImage;
@@ -141,37 +153,11 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     }
   }
-
-  /*void onCameraTap() {
-    log("Camera");
-    // pickImage(source: ImageSource.camera).then((path) {
-    //   if (path != '') {
-    //     imageCropperView(path, context).then((value) => {
-    //       if (value != '')
-    //         {
-    //           Navigator.push(
-    //             context,
-    //             CupertinoPageRoute(
-    //               builder: (_) => RecognizePage(
-    //                 path: value,
-    //               ),
-    //             ),
-    //           ),
-    //         }
-    //     });
-    //   }
-    // });
-  }*/
-
-/*  void onGallaryTap() {
-    log("Gallary");
-    // pickImage(source: ImageSource.gallery).then((path) {
-    //   if (path != '') {
-    //     galleryObject(path);
-    //   }
-    // });
-  }*/
-
+  @override
+  void initState() {
+    // TODO: implement initState
+   readData();
+  }
   @override
   Widget build(BuildContext context) {
     var now = new DateTime.now();
@@ -190,7 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
           //alignment: Alignment.center,
           child: ListView(
             children: [
-              !Done
+              data.length==0
                   ? Container(
                       width: double.infinity,
                       height: 580,
@@ -206,63 +192,67 @@ class _MyHomePageState extends State<MyHomePage> {
                             fontWeight: FontWeight.w600,
                             color: Colors.white),
                       )))
-                  : Card(
-                      // padding: EdgeInsets.all(8),
-                      //width: double.infinity,
-                      color: Colors.green,
-                      child: Row(
-                        //mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            //child: Image.file(File("/storage/emulated/0/Android/data/com.example.untitled/files/recent/my.jpg"),width: 150,height: 90,fit: BoxFit.cover,),
-                              child: Image.asset('assets/icons/play_store.png',width: 150,
-                                height: 90,fit: BoxFit.cover,)
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Container(
+                  : ListView.builder(
+                shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: data.length,
+                  itemBuilder: (context,i)=>Card(
+                    // padding: EdgeInsets.all(8),
+                    //width: double.infinity,
+                    // color: Colors.green,
+                    child: Row(
+                      //mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          //child: Image.file(File("/storage/emulated/0/Android/data/com.example.untitled/files/recent/my.jpg"),width: 150,height: 90,fit: BoxFit.cover,),
+                            child: Image.asset("${data[i]["ImagePath"]}",width: 150,
+                              height: 90,fit: BoxFit.cover,)
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Container(
                               alignment: Alignment.center,
-                                color: Color.fromRGBO(116, 144, 178, 1.0),
-                                //width: 10,
-                                height: 90,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "File_name:  1",
+                              color: Color.fromRGBO(116, 144, 178, 1.0),
+                              //width: 10,
+                              height: 90,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "File_name:  ${data[i]["filename"]}",
+                                    style: TextStyle(
+                                        fontSize: 17,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  //SizedBox(height: 5,),
+                                  Text("Date:  ${data[i]["DATE"]}",
                                       style: TextStyle(
                                           fontSize: 17,
                                           color: Colors.white,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    //SizedBox(height: 5,),
-                                    Text("Date: " + formattedDate,
-                                        style: TextStyle(
-                                            fontSize: 17,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold)),
-                                    Row(
-                                      children: [
-                                        /*IconButton(onPressed:() async{await FlutterShare.shareFile(
-                                      title: 'Example share',
-                                      text: 'Example share text',
-                                      filePath: pdf_path.toString(),
-                                    );}, icon: Icon(Icons.ac_unit)),*/
-                                        IconButton(onPressed: (){
-                                          OpenFile.open(pdf_path);
-                                        }, icon: Image.asset("assets/pp.png")),
-                                      ],
-                                    )
-                                  ],
-                                )),
-                          ),
-                          /*Expanded(flex: 1,child: TextButton(onPressed:(){
+                                          fontWeight: FontWeight.bold)),
+                                  Row(
+                                    children: [
+                                      IconButton(onPressed:() async{await FlutterShare.shareFile(
+                                        title: 'Example share',
+                                        text: 'Example share text',
+                                        filePath: pdf_path,
+                                      );}, icon: Icon(Icons.ac_unit)),
+                                      IconButton(onPressed: (){
+                                        OpenFile.open("${data[i]["PdfPath"]}");
+                                      }, icon: Image.asset("assets/pp.png")),
+                                    ],
+                                  )
+                                ],
+                              )),
+                        ),
+                        /*Expanded(flex: 1,child: TextButton(onPressed:(){
                         OpenFile.open(pdf_path);
                       },child: Text("View pdf")
                   ))*/
-                        ],
-                      ),
+                      ],
                     ),
+                  ),)
             ],
           ),
         ),

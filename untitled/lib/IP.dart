@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'main.dart';
+import 'sql.dart';
 
 class ip extends StatefulWidget {
   ip(this.I, this.done);
@@ -13,6 +14,7 @@ class ip extends StatefulWidget {
 }
 
 class _ipState extends State<ip> {
+  Sql DB=Sql();
   String dropdownValue = 'http://';
   String selectedValue='http://';
   List<String> items = [
@@ -136,7 +138,16 @@ class _ipState extends State<ip> {
                     ),
                     SizedBox(height: 5,),
                     ElevatedButton(
-                        onPressed: () => send_ip(context, selectedValue+_textController.text),
+                        onPressed: () async{
+                          int response=await DB.insert("alnasikh",{
+                            "filename":"a",
+                            "PdfPath":"aaaaaa",
+                            "ImagePath":"assets/icons/play_store.png",
+                            "DATE":"2023-4-15"
+                          }
+                          );
+                          print(response);
+                          send_ip(context, selectedValue+_textController.text);},
                         child: Text("Send"))
                   ],
                 ),
