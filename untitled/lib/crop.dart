@@ -29,24 +29,26 @@ class _cropState extends State<crop> {
         Navigator.push(context,MaterialPageRoute(builder: (context) => blacks(_imageFile,IP)));
       }, icon: Icon(Icons.done_outline,color: Colors.blue,))],
       ),
-      body:Container(
-        color: Colors.black,
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            if (_imageFile != null) ...[
-             Image.file(
-               _imageFile,
+      body:SingleChildScrollView(
+        child: Container(
+          color: Colors.black,
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              if (_imageFile != null) ...[
+               Image.file(
+                 _imageFile,
     width: 400,
-      height: 600,
+        height: 600,
     ),TextButton.icon(onPressed: () async{
-                await imageCropperView(_imageFile,context);
-              }, icon: Icon(Icons.crop),label: Text("Crop")),
-            ] else ...[
-              Text('No image selected.'),
-            ]
-          ],
+                  await imageCropperView(_imageFile,context);
+                }, icon: Icon(Icons.crop),label: Text("Crop")),
+              ] else ...[
+                Text('No image selected.'),
+              ]
+            ],
+          ),
         ),
       ),
     );

@@ -52,7 +52,11 @@ dependencies:
   image_crop: ^0.4.1
   crop_your_image: ^0.7.4
   fab_circular_menu: ^1.0.2
-
+  flutter_share: ^2.0.0
+  share_plus: ^4.5.3
+  share_extend: ^2.0.0
+  dropdown_button2: ^2.0.0
+  carousel_slider: ^4.2.1
 
 
 dev_dependencies:
@@ -89,6 +93,7 @@ flutter:
      - assets/pdf2.pdf
      - assets/landing-pdf-converter.png
      - assets/icons/play_store.png
+     - assets/pp.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

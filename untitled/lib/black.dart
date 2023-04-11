@@ -82,7 +82,11 @@ class _blacks extends State<blacks> {
     final bytes=await ff.readAsBytes();
     final img=ui.decodeImage(bytes);
     final gray=ui.grayscale(img!);
-    final directory = await getApplicationDocumentsDirectory();
+    final directory = Directory((Platform.isAndroid
+        ? await getExternalStorageDirectory() //FOR ANDROID
+        : await getApplicationSupportDirectory() //FOR IOS
+    )!
+        .path + '/recent');
     final imagePath = '${directory.path}/my.jpg';
     final file = File(imagePath);
     final uti=ui.encodeJpg(gray);

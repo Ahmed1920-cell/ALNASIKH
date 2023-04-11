@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:open_file/open_file.dart';
@@ -30,7 +31,7 @@ class _imageViewState extends State<imageView> {
   _imageViewState(this.imageFile, this.IP);
   bool done=false;
 String pdf_path="";
-  final IP;
+  var IP;
   double font=18;
   var chr = "";
   int n = 0;
@@ -43,7 +44,7 @@ String pdf_path="";
     var length = await imageFile.length();
 
     // string to uri
-    var uri = Uri.parse("http://$IP:5000/to_detection");
+    var uri = Uri.parse("https://f6d3-102-41-166-33.eu.ngrok.io/to_detection");
 
     // create multipart request
     var request = new http.MultipartRequest("POST", uri);
@@ -53,8 +54,8 @@ String pdf_path="";
         filename: basename(imageFile.path));
 
     // add file to multipart
+    request.headers.addAll({"ngrok-skip-browser-warning": "0"});
     request.files.add(multipartFile);
-
     // send
     var response = await request.send();
     print(response.statusCode);
@@ -64,7 +65,7 @@ String pdf_path="";
       var str = "";
       for (int i = 0; i < int.parse(value); i++) {
         final res =
-            await http.get(Uri.parse("http://$IP:5000/to_ocr?number=$i"));
+            await http.get(Uri.parse("https://f6d3-102-41-166-33.eu.ngrok.io/to_ocr?number=$i"),headers:{"ngrok-skip-browser-warning": "0"});
         if (res.statusCode == 200) {
           str = str + res.body;
           setState(() {
@@ -101,10 +102,17 @@ String pdf_path="";
                     //color: Colors.red,
                     height: 200,
                     width: 400,
-                    child: Image.file(
-                      imageFile,
-                      height: 200,
-                      width: 400,
+                    child:InteractiveViewer(
+                      panEnabled: false, // Set it to false
+                    // boundaryMargin: EdgeInsets.all(100),
+                      minScale: 1,
+                      maxScale: 4,
+                      child: Image.file(
+                        imageFile,
+                        height: 200,
+                        width: 400,
+                        //fit: BoxFit.cover,
+                      ),
                     ),
                     //RawImage(image: imageFile, fit: BoxFit.contain)
                     //imageFile
@@ -151,8 +159,23 @@ String pdf_path="";
                                   backgroundColor:
                                   MaterialStatePropertyAll(Colors.blue)),
                               onPressed: NotCopy?(){}:() async {
-                                var tempDir = await getTemporaryDirectory();
-                                await download(Dio(), "http://$IP:5000/return_PDF",
+                                //var tempDir = await getTemporaryDirectory();
+                                var tempDir=Directory((Platform.isAndroid
+                                    ? await getExternalStorageDirectory() //FOR ANDROID
+                                    : await getApplicationSupportDirectory() //FOR IOS
+                                )!
+                                    .path + '/recent');
+                                var status = await Permission.storage.status;
+                                if (!status.isGranted) {
+                                  await Permission.storage.request();
+                                }
+                                if ((await tempDir.exists())) {
+                                  print("is exist");
+                                } else {
+                                  tempDir.create(recursive: true);
+                                  print("is create");
+                                }
+                                await download(Dio(), "https://f6d3-102-41-166-33.eu.ngrok.io/return_PDF",
                                     tempDir.path + "/aaa.pdf");
                               },
                               icon: Image.asset("assets/landing-pdf-converter.png",width: 150,height: 150,),),
@@ -241,6 +264,7 @@ String pdf_path="";
         url,
         onReceiveProgress: updateProgress,
         options: Options(
+          headers: {"ngrok-skip-browser-warning": "0"},
             responseType: ResponseType.bytes,
             followRedirects: false,
             validateStatus: (status) {
