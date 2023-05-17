@@ -1,9 +1,7 @@
 import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf_render/pdf_render.dart';
-import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'dart:ui' as ui;
@@ -105,7 +103,7 @@ class _pdf_scanState extends State<pdf_scan> {
                             return Container(
                                 child: Column(
                               children: [
-                                Text("${itemIndex + 1}",
+                                Text("${itemIndex + 1} /${widget.count}",
                                     style: TextStyle(
                                         color: Colors.blue,
                                         fontWeight: FontWeight.bold,

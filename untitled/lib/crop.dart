@@ -1,8 +1,5 @@
 import 'dart:developer';
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:path_provider/path_provider.dart';
-import 'package:image/image.dart' as ui;
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:ALNASIKH/black.dart';
@@ -29,26 +26,26 @@ class _cropState extends State<crop> {
         Navigator.push(context,MaterialPageRoute(builder: (context) => blacks(_imageFile,IP)));
       }, icon: Icon(Icons.done_outline,color: Colors.blue,))],
       ),
-      body:SingleChildScrollView(
-        child: Container(
-          color: Colors.black,
-          alignment: Alignment.center,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              if (_imageFile != null) ...[
-               Image.file(
-                 _imageFile,
+      body:Container(
+        color: Colors.black,
+        alignment: Alignment.center,
+        child: ListView(
+          children: <Widget>[
+            if (_imageFile != null) ...[
+             Image.file(
+               _imageFile,
     width: 400,
-        height: 600,
-    ),TextButton.icon(onPressed: () async{
+       height: MediaQuery.of(context).size.height*(600/736),
+    ),Padding(
+      padding: const EdgeInsets.fromLTRB(0, 9, 0, 0),
+      child: TextButton.icon(onPressed: () async{
                   await imageCropperView(_imageFile,context);
                 }, icon: Icon(Icons.crop),label: Text("Crop")),
-              ] else ...[
-                Text('No image selected.'),
-              ]
-            ],
-          ),
+    ),
+            ] else ...[
+              Text('No image selected.'),
+            ]
+          ],
         ),
       ),
     );

@@ -1,28 +1,24 @@
 import 'dart:io';
 import 'package:ALNASIKH/Pdf%20Scan.dart';
 import 'package:ALNASIKH/sql.dart';
-import 'package:intl/intl.dart';
 import 'package:pdf_render/pdf_render.dart';
 import 'package:document_scanner_flutter/document_scanner_flutter.dart';
 import 'package:document_scanner_flutter/configs/configs.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:open_file/open_file.dart';
-import 'package:ALNASIKH/IP.dart';
-import 'newplash.dart';
-import 'imageview.dart';
+import 'package:ALNASIKH/Setting.dart';
+import 'Document_View.dart';
+import 'splash.dart';
+import 'OCR_Result.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fab_circular_menu/fab_circular_menu.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter_share/flutter_share.dart';
 import 'dart:ui' as ui;
-import 'package:ALNASIKH/crop.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:share_extend/share_extend.dart';
+
 Future<File?> pickPdfFile() async {
   final result = await FilePicker.platform.pickFiles(
     type: FileType.custom,
@@ -39,6 +35,9 @@ Future<File?> pickPdfFile() async {
 }
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   runApp(MyApp());
 }
 
@@ -54,6 +53,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: splashScreen(),
+      // home: home(),
       //home: ip(),
     );
   }
@@ -71,23 +71,37 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final GlobalKey<FabCircularMenuState> fabKey = GlobalKey();
   final IP;
   final Done;
   final pdf_path;
+  bool IsEdit = false;
+  int id = 0;
+  List temp = [];
+  bool IsSearch = false;
+  bool isLoading = true;
+  bool IsExist = false;
+  bool IsEmpty = false;
+  bool OnChange = false;
+  TextEditingController editingController = TextEditingController();
+  TextEditingController edit_name = TextEditingController();
 
   _MyHomePageState(this.IP, this.Done, this.pdf_path);
-  List data=[];
-Sql DB=Sql();
-readData() async{
-  List<Map> response=await DB.read("alnasikh");
-  data.addAll(response);
-  if (this.mounted){
-    setState(() {
+DateTime timeBackPressed=DateTime.now();
+  List data = [];
+  Sql DB = Sql();
 
-    });
+  readData() async {
+    List<Map> response = await DB.read("alnasikh");
+    data.addAll(response);
+    if (this.mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+    print(data.length);
   }
-  print(data.length);
-}
+
   bool isCamera = false;
   double r = 0;
   File? _scannedImage;
@@ -119,7 +133,8 @@ readData() async{
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => imageView(
+              builder: (context) =>
+                  imageView(
                     imagePath: image,
                     ip: IP,
                   )));
@@ -128,6 +143,39 @@ readData() async{
         _scannedImage = image;
       });
     }
+  }
+
+  void filterSearchResults(String query) {
+    setState(() {
+      temp = data
+          .where((item) =>
+          item["filename"].toLowerCase().contains(query.toLowerCase()))
+          .toList();
+      print(temp);
+    });
+  }
+
+  Future<File> saveImage(File _imageFile) async {
+    File ff = _imageFile;
+    final bytes = await ff.readAsBytes();
+    final directory = Directory((Platform.isAndroid
+        ? await getExternalStorageDirectory() //FOR ANDROID
+        : await getApplicationSupportDirectory() //FOR IOS
+    )!
+        .path +
+        '/recent/image');
+    if ((await directory.exists())) {
+      print("is exist");
+    } else {
+      directory.create(recursive: true);
+      print("is create");
+    }
+
+    final imagePath = '${directory.path}/${edit_name.text}.pdf';
+    final file = File(imagePath);
+    await file.writeAsBytes(bytes);
+    print(file.path);
+    return file;
   }
 
   openGalleryScanner(BuildContext context, String IP) async {
@@ -143,7 +191,8 @@ readData() async{
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => imageView(
+              builder: (context) =>
+                  imageView(
                     imagePath: image,
                     ip: IP,
                   )));
@@ -153,120 +202,804 @@ readData() async{
       });
     }
   }
+
   @override
   void initState() {
     // TODO: implement initState
-   readData();
+    readData();
+    temp = data;
   }
+
   @override
   Widget build(BuildContext context) {
-    var now = new DateTime.now();
-    var formatter = new DateFormat('yyyy-MM-dd');
-    String formattedDate = formatter.format(now);
-    return DefaultTabController(
-      length: 2,
+    return WillPopScope(
+      onWillPop: ()async{
+        print(timeBackPressed);
+        final difference=DateTime.now().difference(timeBackPressed);
+        print(difference.inMilliseconds);
+        final IsExistWarning=difference >= Duration(milliseconds: 900);
+        print(IsExistWarning);
+        timeBackPressed=DateTime.now();
+        if(IsExistWarning){
+          final message='Press back again to exit';
+          Fluttertoast.showToast(msg: message,fontSize: 16,backgroundColor: Color.fromRGBO(
+              80, 80, 80, 1.0));
+          return false;
+        }
+        else{
+          return true;
+        }
+      },
       child: Scaffold(
         appBar: AppBar(
-          title: Text("ALNASIKH APP"),
           elevation: 0,
-        ),
-        body: Container(
-          color: Colors.black,
-          height: double.infinity,
-          //alignment: Alignment.center,
-          child: ListView(
-            children: [
-              data.length==0
-                  ? Container(
-                      width: double.infinity,
-                      height: 580,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30),
-                        //color: Colors.grey
+          actions: [
+            !IsSearch
+                ? IconButton(
+                onPressed: () {
+                  setState(() {
+                    IsSearch = true;
+                  });
+                },
+                icon: Icon(
+                  Icons.search,
+                  size: 30,
+                  color: Colors.white,
+                ))
+                : Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: SizedBox(
+                width: 250,
+                child: TextField(
+                  style: TextStyle(color: Colors.black, fontSize: 17),
+                  onChanged: (value) {
+                    filterSearchResults(value);
+                  },
+                  controller: editingController,
+                  decoration: InputDecoration(
+                      contentPadding: EdgeInsets.all(14.0),
+                      fillColor: Colors.white,
+                      filled: true,
+                      hintText: "Search",
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            IsSearch = false;
+                            temp = data;
+                            editingController.text = "";
+                          });
+                        },
+                        icon: Icon(
+                          Icons.close,
+                          color: Colors.blue,
+                          size: 30,
+                        ),
                       ),
-                      child: Center(
-                          child: Text(
-                        "Recent Documents",
-                        style: TextStyle(
-                            fontSize: 23,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white),
-                      )))
-                  : ListView.builder(
-                shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: data.length,
-                  itemBuilder: (context,i)=>Card(
-                    // padding: EdgeInsets.all(8),
-                    //width: double.infinity,
-                    // color: Colors.green,
-                    child: Row(
-                      //mainAxisAlignment: MainAxisAlignment.start,
+                      border: OutlineInputBorder(
+                          borderRadius:
+                          BorderRadius.all(Radius.circular(15.0)))),
+                ),
+              ),
+            ),
+          ],
+        ),
+        body: InkWell(
+          onTap: () {
+            if (fabKey.currentState!.isOpen) fabKey.currentState!.close();
+          },
+          child: Container(
+            color: Colors.blue,
+            child: ListView(
+              children: [
+                Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Container(
-                          //child: Image.file(File("/storage/emulated/0/Android/data/com.example.untitled/files/recent/my.jpg"),width: 150,height: 90,fit: BoxFit.cover,),
-                            child: Image.asset("${data[i]["ImagePath"]}",width: 150,
-                              height: 90,fit: BoxFit.cover,)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(
+                            Icons.home,
+                            color: Colors.white,
+                            size: 55,
+                          ),
                         ),
-                        Expanded(
-                          flex: 1,
-                          child: Container(
-                              alignment: Alignment.center,
-                              color: Color.fromRGBO(116, 144, 178, 1.0),
-                              //width: 10,
-                              height: 90,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "File_name:  ${data[i]["filename"]}",
-                                    style: TextStyle(
-                                        fontSize: 17,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  //SizedBox(height: 5,),
-                                  Text("Date:  ${data[i]["DATE"]}",
-                                      style: TextStyle(
-                                          fontSize: 17,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold)),
-                                  Row(
-                                    children: [
-                                      IconButton(onPressed:() async{await FlutterShare.shareFile(
-                                        title: 'Example share',
-                                        text: 'Example share text',
-                                        filePath: pdf_path,
-                                      );}, icon: Icon(Icons.ac_unit)),
-                                      IconButton(onPressed: (){
-                                        OpenFile.open("${data[i]["PdfPath"]}");
-                                      }, icon: Image.asset("assets/pp.png")),
-                                    ],
-                                  )
-                                ],
-                              )),
+                        SizedBox(
+                          width: 5,
                         ),
-                        /*Expanded(flex: 1,child: TextButton(onPressed:(){
-                        OpenFile.open(pdf_path);
-                      },child: Text("View pdf")
-                  ))*/
+                        Text(
+                          "Home Page",
+                          style: TextStyle(
+                              fontSize: 22,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    )),
+                Container(
+                  decoration: BoxDecoration(
+                    //border:Border.all(color: Colors.grey,width: 5),
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30)),
+                    color: Colors.black,
+                  ),
+                  width: double.infinity,
+                  //height: 610,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(15, 15, 0, 10),
+                    child: Text(
+                      "Recents",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                if (temp.length == 0 && !isLoading)
+                  Container(
+                    alignment: Alignment.center,
+                    color: Colors.black,
+                    height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * (516 / 736),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 200,
+                        ),
+                        Icon(
+                          Icons.document_scanner,
+                          color: Colors.white,
+                          size: 40,
+                        ),
+                        Text(" No Recent\n Documents",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold))
                       ],
                     ),
-                  ),)
-            ],
+                  )
+                else
+                  if (isLoading)
+                    Container(
+                      alignment: Alignment.center,
+                      color: Colors.black,
+                      height: MediaQuery
+                          .of(context)
+                          .size
+                          .height * (516 / 736),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 200,
+                          ),
+                          Text("Loading...",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold))
+                        ],
+                      ),
+                    )
+                  else
+                    Container(
+                      color: Colors.black,
+                      //width: MediaQuery.of(context).size.height,
+                      alignment: (temp.length) < 3 ? Alignment.topLeft : null,
+                      height: (temp.length) < 3
+                          ? MediaQuery
+                          .of(context)
+                          .size
+                          .height * (520 / 736)
+                          : null,
+                      child: ListView.builder(
+                        reverse: true,
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        //physics: AlwaysScrollableScrollPhysics(),
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: temp.length,
+                        itemBuilder: (context, i) =>
+                            Container(
+                              margin: const EdgeInsets.all(2.0),
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: (i != 0)
+                                        ? const EdgeInsets.fromLTRB(0, 0, 0, 10)
+                                        : const EdgeInsets.fromLTRB(
+                                        0, 0, 0, 50),
+                                    child: Card(
+                                      color: Colors.black,
+                                      clipBehavior: Clip.antiAliasWithSaveLayer,
+                                      shadowColor: Colors.blueAccent,
+                                      elevation: 10,
+                                      child: Row(
+                                        //mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                              margin: EdgeInsets.fromLTRB(
+                                                  5, 0, 0, 0),
+                                              /*decoration: BoxDecoration(
+                                            border:Border.all(color: Colors.black,width: 3),
+                                            borderRadius: BorderRadius.circular(5),
+                                            //Colors.grey.withOpacity(0.3)
+                                          ),*/
+                                              //child: Image.file(File("/storage/emulated/0/Android/data/com.example.untitled/files/recent/my.jpg"),width: 150,height: 90,fit: BoxFit.cover,),
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                BorderRadius.circular(15.0),
+                                                child: Image.file(
+                                                  File(
+                                                      "${temp[i]["ImagePath"]}"),
+                                                  width: MediaQuery
+                                                      .of(context)
+                                                      .size
+                                                      .width *
+                                                      (103 / 360),
+                                                  height: MediaQuery
+                                                      .of(context)
+                                                      .size
+                                                      .height *
+                                                      (134 / 736),
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              )),
+                                          Expanded(
+                                            flex: 1,
+                                            child: Container(
+                                              padding:
+                                              EdgeInsets.fromLTRB(5, 0, 0, 0),
+                                              //alignment: Alignment.center,
+                                              //color: Color.fromRGBO(140, 140, 140, 1.0),
+                                              color: Colors.black,
+                                              //width: 10,
+                                              height:
+                                              MediaQuery
+                                                  .of(context)
+                                                  .size
+                                                  .height *
+                                                  (144 / 736),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                    const EdgeInsets.all(4.0),
+                                                    child: Expanded(
+                                                      flex: 2,
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                        mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                        children: [
+                                                          if (!IsEdit ||
+                                                              id !=
+                                                                  temp[i]["id"])
+                                                            Padding(
+                                                              padding:
+                                                              const EdgeInsets
+                                                                  .fromLTRB(
+                                                                  0, 15, 0, 0),
+                                                              child: Text(
+                                                                "${temp[i]["filename"]}",
+                                                                style: TextStyle(
+                                                                    fontSize: 17,
+                                                                    color: Color
+                                                                        .fromRGBO(
+                                                                        245,
+                                                                        245,
+                                                                        245,
+                                                                        0.8666666666666667),
+                                                                    fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                              ),
+                                                            )
+                                                          else
+                                                            if (IsEdit &&
+                                                                id ==
+                                                                    temp[i]["id"])
+                                                              Padding(
+                                                                padding:
+                                                                const EdgeInsets
+                                                                    .fromLTRB(
+                                                                    0, 5, 0, 0),
+                                                                child: Column(
+                                                                  children: [
+                                                                    SizedBox(
+                                                                      // <-- SEE HERE
+                                                                      width: MediaQuery
+                                                                          .of(
+                                                                          context)
+                                                                          .size
+                                                                          .width *
+                                                                          (175 /
+                                                                              360),
+                                                                      height: MediaQuery
+                                                                          .of(
+                                                                          context)
+                                                                          .size
+                                                                          .height *
+                                                                          (41 /
+                                                                              736),
+                                                                      child: Container(
+                                                                        padding:
+                                                                        EdgeInsets
+                                                                            .fromLTRB(
+                                                                            10,
+                                                                            0,
+                                                                            0,
+                                                                            0),
+                                                                        decoration:
+                                                                        BoxDecoration(
+                                                                          border: Border
+                                                                              .all(
+                                                                              color: Colors
+                                                                                  .blue,
+                                                                              width: 2),
+                                                                          borderRadius:
+                                                                          BorderRadius
+                                                                              .circular(
+                                                                              15),
+                                                                        ),
+                                                                        child:
+                                                                        TextField(
+                                                                          onChanged:
+                                                                          OnChange
+                                                                              ? (
+                                                                              value) {
+                                                                            setState(() {
+                                                                              edit_name
+                                                                                  .text =
+                                                                                  value;
+                                                                              edit_name
+                                                                                  .selection =
+                                                                                  TextSelection
+                                                                                      .fromPosition(
+                                                                                      TextPosition(
+                                                                                          offset: edit_name
+                                                                                              .text
+                                                                                              .length));
+                                                                            });
+                                                                          }
+                                                                              : null,
+                                                                          maxLength: 22,
+                                                                          style: TextStyle(
+                                                                              color: Colors
+                                                                                  .white,
+                                                                              fontSize:
+                                                                              14),
+                                                                          controller:
+                                                                          edit_name,
+                                                                          keyboardType:
+                                                                          TextInputType
+                                                                              .name,
+                                                                          decoration: InputDecoration(
+                                                                              counterText:
+                                                                              '',
+                                                                              hintText:
+                                                                              "Enter Name",
+                                                                              hintStyle: TextStyle(
+                                                                                  color: Colors
+                                                                                      .grey,
+                                                                                  fontSize:
+                                                                                  14,
+                                                                                  fontWeight:
+                                                                                  FontWeight
+                                                                                      .bold)
+                                                                            //prefixStyle:TextStyle(color: Colors.white)
+
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    if (IsExist)
+                                                                      Text(
+                                                                        "the name is exist",
+                                                                        style: TextStyle(
+                                                                            color: Colors
+                                                                                .red,
+                                                                            fontSize:
+                                                                            11),
+                                                                      )
+                                                                    else
+                                                                      if (IsEmpty)
+                                                                        Text(
+                                                                          "Please Enter the name",
+                                                                          style: TextStyle(
+                                                                              color: Colors
+                                                                                  .red,
+                                                                              fontSize:
+                                                                              11),
+                                                                        )
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                          SizedBox(
+                                                            height: 9,
+                                                          ),
+                                                          Text(
+                                                              "${temp[i]["DATE"]}                                  ",
+                                                              style: TextStyle(
+                                                                  fontSize: 14,
+                                                                  color:
+                                                                  Colors.grey)),
+                                                          /*TextButton(onPressed: (){}, child:Text("View pdf",style: TextStyle(fontSize: 15,color: Color.fromRGBO(
+                                                  3, 79, 124, 1.0),wordSpacing: 2),))*/
+                                                          Container(
+                                                            //alignment: Alignment.center,
+                                                            padding: const EdgeInsets
+                                                                .fromLTRB(
+                                                                25, 0, 0, 0),
+                                                            child: Row(
+                                                              children: [
+                                                                ElevatedButton(
+                                                                    style: ButtonStyle(
+                                                                        backgroundColor:
+                                                                        MaterialStatePropertyAll(Colors.black)),
+                                                                    onPressed: () {
+                                                                      Navigator.push(
+                                                                          context,
+                                                                          MaterialPageRoute(
+                                                                              builder: (context) =>
+                                                                                  document_view(
+                                                                                    MetaData: temp[i],
+                                                                                  )));
+                                                                    },
+                                                                    child: Text(
+                                                                      "View",
+                                                                      style: TextStyle(
+                                                                          fontSize: 15,
+                                                                          color: Color
+                                                                              .fromRGBO(
+                                                                              12,
+                                                                              100,
+                                                                              180,
+                                                                              1.0),
+                                                                          wordSpacing: 2),
+                                                                    )),
+                                                                ElevatedButton(
+                                                                    style: ButtonStyle(
+                                                                        backgroundColor:
+                                                                        MaterialStatePropertyAll(Colors.black)),
+                                                                    onPressed: () {
+                                                                      OpenFile.open(
+                                                                          "${temp[i]["PdfPath"]}");
+                                                                    },
+                                                                    child: Text(
+                                                                      "Open pdf",
+                                                                      style: TextStyle(
+                                                                          fontSize: 15,
+                                                                          color: Color
+                                                                              .fromRGBO(
+                                                                              12,
+                                                                              100,
+                                                                              180,
+                                                                              1.0),
+                                                                          wordSpacing: 2),
+                                                                    )),
+                                                              ],
+                                                            ),
+                                                          )
+                                                          /*IconButton(onPressed: (){}, icon: Icon(Icons.picture_as_pdf,color: Color.fromRGBO(
+                                                  203, 26, 12, 1.0),))*/
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Expanded(
+                                                    flex: 1,
+                                                    child: Column(
+                                                      mainAxisSize: MainAxisSize
+                                                          .min,
+                                                      crossAxisAlignment:
+                                                      CrossAxisAlignment.end,
+                                                      //verticalDirection: VerticalDirection.down,
+                                                      children: [
+                                                        if (!IsEdit ||
+                                                            id != temp[i]["id"])
+                                                          ElevatedButton(
+                                                            onPressed: () {
+                                                              setState(() {
+                                                                IsExist = false;
+                                                                IsEmpty = false;
+                                                                IsEdit = true;
+                                                                OnChange =
+                                                                false;
+                                                                id =
+                                                                temp[i]["id"];
+                                                                edit_name.text =
+                                                                temp[i]
+                                                                ["filename"];
+                                                              });
+                                                            },
+                                                            child: Icon(
+                                                              Icons.edit,
+                                                              color: Colors
+                                                                  .blue,
+                                                            ),
+                                                            style: ElevatedButton
+                                                                .styleFrom(
+                                                              shape: CircleBorder(),
+                                                              backgroundColor:
+                                                              Colors.black,
+                                                              padding:
+                                                              EdgeInsets.zero,
+                                                              minimumSize: Size
+                                                                  .zero,
+                                                            ),
+                                                          )
+                                                        else
+                                                          if (IsEdit &&
+                                                              id ==
+                                                                  temp[i]["id"])
+                                                            ElevatedButton(
+                                                              onPressed: () async {
+                                                                setState(() {
+                                                                  OnChange =
+                                                                  true;
+                                                                });
+                                                                if (edit_name
+                                                                    .text
+                                                                    .isEmpty &&
+                                                                    OnChange) {
+                                                                  setState(() {
+                                                                    IsEmpty =
+                                                                    true;
+                                                                    IsExist =
+                                                                    false;
+                                                                    OnChange =
+                                                                    false;
+                                                                  });
+                                                                }
+                                                                if (edit_name
+                                                                    .text
+                                                                    .isNotEmpty &&
+                                                                    OnChange) {
+                                                                  File pdf_path =
+                                                                  await saveImage(
+                                                                      File(
+                                                                          temp[i][
+                                                                          "PdfPath"]));
+                                                                  int response =
+                                                                  await DB
+                                                                      .update(
+                                                                      "alnasikh",
+                                                                      {
+                                                                        "filename":
+                                                                        edit_name
+                                                                            .text
+                                                                            .trim(),
+                                                                        "PdfPath":
+                                                                        pdf_path
+                                                                            .path,
+                                                                        "ImagePath":
+                                                                        temp[i][
+                                                                        "ImagePath"],
+                                                                        "DATE": temp[
+                                                                        i]
+                                                                        ["DATE"]
+                                                                      },
+                                                                      "id =${temp[i]["id"]} ");
+                                                                  if (response >
+                                                                      0) {
+                                                                    print(
+                                                                        response);
+                                                                    setState(() {
+                                                                      IsEdit =
+                                                                      false;
+                                                                      IsExist =
+                                                                      false;
+                                                                      IsEmpty =
+                                                                      false;
+                                                                      OnChange =
+                                                                      false;
+                                                                    });
+                                                                    Navigator
+                                                                        .pushReplacement(
+                                                                        context,
+                                                                        MaterialPageRoute(
+                                                                            builder:
+                                                                                (
+                                                                                _) {
+                                                                              return MyHomePage(
+                                                                                  IP,
+                                                                                  widget
+                                                                                      .done,
+                                                                                  "");
+                                                                            }));
+                                                                  } else {
+                                                                    setState(() {
+                                                                      IsEmpty =
+                                                                      false;
+                                                                      IsExist =
+                                                                      true;
+                                                                      OnChange =
+                                                                      false;
+                                                                    });
+                                                                  }
+                                                                }
+                                                              },
+                                                              child: Icon(
+                                                                Icons.done,
+                                                                color: Colors
+                                                                    .blue,
+                                                                size: 30,
+                                                              ),
+                                                              style: ElevatedButton
+                                                                  .styleFrom(
+                                                                shape: CircleBorder(),
+                                                                backgroundColor:
+                                                                Colors.black,
+                                                                padding:
+                                                                EdgeInsets.zero,
+                                                                minimumSize: Size
+                                                                    .zero,
+                                                              ),
+                                                            ),
+                                                        ElevatedButton(
+                                                          onPressed: () =>
+                                                              showDialog(
+                                                                  context: context,
+                                                                  builder:
+                                                                      (
+                                                                      BuildContext
+                                                                      ctx) =>
+                                                                      AlertDialog(
+                                                                        elevation: 2,
+                                                                        shadowColor:
+                                                                        Colors
+                                                                            .blue,
+                                                                        clipBehavior:
+                                                                        Clip
+                                                                            .hardEdge,
+                                                                        backgroundColor:
+                                                                        Colors
+                                                                            .black,
+                                                                        title: const Text(
+                                                                            'Delete'),
+                                                                        titleTextStyle: TextStyle(
+                                                                            color: Colors
+                                                                                .white,
+                                                                            fontSize:
+                                                                            18),
+                                                                        content:
+                                                                        const Text(
+                                                                            'Do you want to delete this item'),
+                                                                        contentTextStyle: TextStyle(
+                                                                            color: Colors
+                                                                                .white,
+                                                                            fontWeight:
+                                                                            FontWeight
+                                                                                .bold),
+                                                                        actions: [
+                                                                          TextButton(
+                                                                            onPressed: () =>
+                                                                                Navigator
+                                                                                    .pop(
+                                                                                    context,
+                                                                                    'Cancel'),
+                                                                            child:
+                                                                            const Text(
+                                                                              'No',
+                                                                              style: TextStyle(
+                                                                                  color:
+                                                                                  Colors
+                                                                                      .blue),
+                                                                            ),
+                                                                          ),
+                                                                          TextButton(
+                                                                            onPressed:
+                                                                                () async {
+                                                                              int response = await DB
+                                                                                  .delete(
+                                                                                  "alnasikh",
+                                                                                  "id =${temp[i]["id"]} ");
+                                                                              if (response >
+                                                                                  0) {
+                                                                                temp
+                                                                                    .removeWhere((
+                                                                                    element) =>
+                                                                                element["id"] ==
+                                                                                    data[i]["id"]);
+                                                                                setState(
+                                                                                        () {});
+                                                                                Navigator
+                                                                                    .pop(
+                                                                                    context,
+                                                                                    'Yes');
+                                                                              }
+                                                                            },
+                                                                            child:
+                                                                            const Text(
+                                                                              'Yes',
+                                                                              style: TextStyle(
+                                                                                  color:
+                                                                                  Colors
+                                                                                      .blue),
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      )),
+                                                          child: Icon(
+                                                            Icons.delete,
+                                                            color: Colors.blue,
+                                                          ),
+                                                          style: ElevatedButton
+                                                              .styleFrom(
+                                                            shape: CircleBorder(),
+                                                            backgroundColor:
+                                                            Colors.black,
+                                                            padding: EdgeInsets
+                                                                .zero,
+                                                            minimumSize: Size
+                                                                .zero,
+                                                          ),
+                                                        ),
+                                                        ElevatedButton(
+                                                          onPressed: () async {
+                                                            await Share
+                                                                .shareFiles([
+                                                              data[i]["PdfPath"]
+                                                            ],
+                                                                text: 'Great picture');
+                                                          },
+                                                          style: ElevatedButton
+                                                              .styleFrom(
+                                                            shape: CircleBorder(),
+                                                            backgroundColor:
+                                                            Colors.black,
+                                                            padding: EdgeInsets
+                                                                .zero,
+                                                            minimumSize: Size
+                                                                .zero,
+                                                          ),
+                                                          child: Icon(
+                                                            Icons.share,
+                                                            color: Colors.blue,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                      ),
+                    )
+              ],
+            ),
           ),
         ),
-        /* floatingActionButton: FloatingActionButton(
-        onPressed: () => openImageScanner(context, IP),
-        child: Icon(Icons.camera_alt_outlined)),*/
         floatingActionButton: FabCircularMenu(
+            fabOpenIcon: Icon(Icons.add),
+            //animationCurve: Curves.easeInOutCirc,
             alignment: Alignment.bottomRight,
             ringColor: Colors.blue.withAlpha(25),
-            ringDiameter: 400.0,
+            ringDiameter: 380.0,
             ringWidth: 100.0,
-            fabSize: 60.0,
+            fabSize: 55.0,
             fabElevation: 8.0,
             fabIconBorder: CircleBorder(),
+            key: fabKey,
             children: <Widget>[
               RawMaterialButton(
                 onPressed: () {
@@ -279,7 +1012,7 @@ readData() async{
                   Icons.settings,
                   size: 30.0,
                 ),
-                padding: EdgeInsets.all(15.0),
+                padding: EdgeInsets.all(14.0),
                 shape: CircleBorder(),
               ),
               RawMaterialButton(
@@ -288,8 +1021,11 @@ readData() async{
 
                   if (path != null) {
                     final doc = await PdfDocument.openFile(path.path);
-                    var i=doc.pageCount;
-                    Navigator.push(context,MaterialPageRoute(builder: (context) => pdf_scan(doc,i,IP)));
+                    var i = doc.pageCount;
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => pdf_scan(doc, i, IP)));
                     /*PdfPage page = await doc.getPage(1);
                     PdfPageImage pageImage = await page.render(
                       width: page.width.toInt(),
@@ -330,22 +1066,23 @@ readData() async{
                     // print(imageWidget);
                     print(path.path);
                   }*/
-                  //return RawImage(image: pageImage.imageIfAvailable, fit: BoxFit.contain);
-                  //await pageImage.writeAsBytes(File('path/to/image/file').readAsBytesSync());
-                  //imageView(imagePath:imageFile.path,ip:"192.168.1.1");
-                  print(path);
-                }},
+                    //return RawImage(image: pageImage.imageIfAvailable, fit: BoxFit.contain);
+                    //await pageImage.writeAsBytes(File('path/to/image/file').readAsBytesSync());
+                    //imageView(imagePath:imageFile.path,ip:"192.168.1.1");
+                    print(path);
+                  }
+                },
                 elevation: 10.0,
                 fillColor: Colors.orange,
                 child: Icon(
                   Icons.picture_as_pdf,
                   size: 30.0,
                 ),
-                padding: EdgeInsets.all(15.0),
+                padding: EdgeInsets.all(14.0),
                 shape: CircleBorder(),
               ),
               CircleAvatar(
-                radius: 30,
+                radius: 28,
                 backgroundColor: Colors.purple,
                 child: IconButton(
                     icon: Icon(
@@ -357,7 +1094,7 @@ readData() async{
                     }),
               ),
               CircleAvatar(
-                radius: 30,
+                radius: 28,
                 backgroundColor: Colors.deepOrange,
                 child: IconButton(
                     icon: Icon(

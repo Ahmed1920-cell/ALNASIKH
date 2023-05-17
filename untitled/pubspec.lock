@@ -121,14 +121,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.1"
-  crop_your_image:
-    dependency: "direct main"
-    description:
-      name: crop_your_image
-      sha256: "8c74c6a6ad1f418c462ef2fd7a31a2dc72139ddc5ab9287d8049b3872f2321f3"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.7.4"
   cross_file:
     dependency: transitive
     description:
@@ -254,14 +246,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.9"
-  flutter_share:
-    dependency: "direct main"
-    description:
-      name: flutter_share
-      sha256: ae12c1cea13b35926a109824ffac601531e40cb94ad53eeae58625eceb3eaaaa
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -272,6 +256,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  fluttertoast:
+    dependency: "direct main"
+    description:
+      name: fluttertoast
+      sha256: "2f9c4d3f4836421f7067a28f8939814597b27614e021da9d63e5d3fb6e212d25"
+      url: "https://pub.dev"
+    source: hosted
+    version: "8.2.1"
   http:
     dependency: "direct main"
     description:
@@ -296,14 +288,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.15"
-  image_crop:
-    dependency: "direct main"
-    description:
-      name: image_crop
-      sha256: a580010f9e90b20581ecf5e8f4e9aa838cb935ea1497f9d1b196baa382b84a6d
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.1"
   image_cropper:
     dependency: "direct main"
     description:
@@ -336,14 +320,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
-  intl:
-    dependency: transitive
-    description:
-      name: intl
-      sha256: a3715e3bc90294e971cb7dc063fbf3cd9ee0ebf8604ffeafabd9e6f16abbdbe6
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.18.0"
   js:
     dependency: transitive
     description:
@@ -608,14 +584,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.27.7"
-  share_extend:
-    dependency: "direct main"
-    description:
-      name: share_extend
-      sha256: "98c26f04abae42b0d2080102a42a2653a867a4bec862be1e921cb0cf7cc00916"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
   share_plus:
     dependency: "direct main"
     description:
@@ -644,10 +612,10 @@ packages:
     dependency: transitive
     description:
       name: share_plus_platform_interface
-      sha256: "82ddd4ab9260c295e6e39612d4ff00390b9a7a21f1bb1da771e2f232d80ab8a1"
+      sha256: "0c6e61471bd71b04a138b8b588fa388e66d8b005e6f2deda63371c5c505a0981"
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.0"
+    version: "3.2.1"
   share_plus_web:
     dependency: transitive
     description:
@@ -717,22 +685,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
-  syncfusion_flutter_core:
-    dependency: transitive
-    description:
-      name: syncfusion_flutter_core
-      sha256: "4319454a92fe5aea1e90ff68c17703a39517ab05dd3074c34c9553e5f7cbf414"
-      url: "https://pub.dev"
-    source: hosted
-    version: "20.4.52"
-  syncfusion_flutter_pdf:
-    dependency: "direct main"
-    description:
-      name: syncfusion_flutter_pdf
-      sha256: b3fe64d668e3ccdb03edde0e35a04d001d7ea710fb190b4c29d9982ab8dd6343
-      url: "https://pub.dev"
-    source: hosted
-    version: "20.4.52"
   synchronized:
     dependency: transitive
     description:

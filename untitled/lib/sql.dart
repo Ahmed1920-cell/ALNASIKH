@@ -24,6 +24,7 @@ class Sql{
     filename TEXT NOT NULL UNIQUE,
     PdfPath TEXT NOT NULL,
     ImagePath TEXT NOT NULL,
+    Sentence TEXT NOT NULL,
     DATE TEXT NOT NULL
     )
     ''');
@@ -55,8 +56,13 @@ class Sql{
   }
   update (String table ,Map<String,Object> values,String? mywhere) async{
     Database? mydb=await db;
-    int response =await mydb!.update(table,values,where: mywhere);
-    return response;
+    try{
+      int response =await mydb!.update(table,values,where: mywhere);
+      return response;
+    }
+catch(e){
+      return 0;
+}
   }
   delete (String table ,String? mywhere) async{
     Database? mydb=await db;

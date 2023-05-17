@@ -1,9 +1,9 @@
-import 'dart:developer';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as ui;
 import 'package:flutter/material.dart';
-import 'package:ALNASIKH/imageview.dart';
+import 'package:path/path.dart'as p;
+import 'package:ALNASIKH/OCR_Result.dart';
 class blacks extends StatefulWidget {
   final image;
   final ip;
@@ -24,6 +24,15 @@ class _blacks extends State<blacks> {
   final IP;
   bool black=false;
   _blacks(this._imageFile,this.IP);
+  late File file;
+  late String basename;
+  @override
+  void initState() {
+    file = new File(_imageFile.toString());
+    basename = p.basename(file.path);
+    basename=basename.replaceAll('image_cropper_', "");
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,8 +95,15 @@ class _blacks extends State<blacks> {
         ? await getExternalStorageDirectory() //FOR ANDROID
         : await getApplicationSupportDirectory() //FOR IOS
     )!
-        .path + '/recent');
-    final imagePath = '${directory.path}/my.jpg';
+        .path + '/recent/image');
+    final imagePath = '${directory.path}/$basename';
+    if ((await directory.exists())) {
+      print("is exist");
+    } else {
+      directory.create(recursive: true);
+      print("is create");
+    }
+
     final file = File(imagePath);
     final uti=ui.encodeJpg(gray);
     await file.writeAsBytes(uti);

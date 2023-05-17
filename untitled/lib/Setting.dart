@@ -24,23 +24,29 @@ class _ipState extends State<ip> {
   final _textController = TextEditingController();
 
   send_ip(BuildContext ctx, String IP) {
-    Navigator.pushReplacement(ctx, MaterialPageRoute(builder: (_) {
-      return MyHomePage(IP, widget.done, "");
-    }));
+    Navigator.pushAndRemoveUntil(ctx, MaterialPageRoute(builder: (_){
+      return MyHomePage(IP,widget.done,"");
+    }),
+          (route) => false,);
   }
-
+@override
+  void initState() {
+    // TODO: implement initState
+  var spl=widget.I.toString();
+  var hpp=spl.split("//");
+  if(hpp[0]=="http:" ||hpp[0]=="https:" )
+    selectedValue=hpp[0]+"//";
+  var rem=widget.I.toString();
+  widget.I=rem.replaceAll('http://', "").replaceAll("https://", "").replaceAll(":5000", "");
+  var list=widget.I.toString();
+  //_textController.text = widget.I.toString();
+  _textController.text = list;
+  _textController.selection = TextSelection.fromPosition(TextPosition(offset: _textController.text.length));
+  print(_textController.text);
+  }
   @override
   Widget build(BuildContext context) {
-    var spl=widget.I.toString();
-    var hpp=spl.split("//");
-      if(hpp[0]=="http:" ||hpp[0]=="https:" )
-      selectedValue=hpp[0]+"//";
-    var rem=widget.I.toString();
-    widget.I=rem.replaceAll('http://', "").replaceAll("https://", "");
-    var list=widget.I.toString();
-    //_textController.text = widget.I.toString();
-    _textController.text = list;
-    print(_textController.text);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -72,7 +78,7 @@ class _ipState extends State<ip> {
 
                               style: TextStyle(),
                               dropdownStyleData: DropdownStyleData(
-                                width: 95,
+                                width: MediaQuery.of(context).size.width*(95/360),
                                 decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(14),
                                 color: Colors.blue,
@@ -101,7 +107,7 @@ class _ipState extends State<ip> {
                                   selectedValue = value as String;
                                 });
                               },
-                              buttonStyleData: ButtonStyleData(width: 100,padding: EdgeInsets.fromLTRB(5, 0, 0, 0),decoration: BoxDecoration()
+                              buttonStyleData: ButtonStyleData(width: MediaQuery.of(context).size.width*(100/360),padding: EdgeInsets.fromLTRB(5, 0, 0, 0),decoration: BoxDecoration()
                               ),
                               menuItemStyleData: MenuItemStyleData(selectedMenuItemBuilder: (BuildContext context,child) {
                                   return Container(
@@ -119,10 +125,12 @@ class _ipState extends State<ip> {
                             // <-- SEE HERE
                             width: 200,
                             child: TextField(
+                              //autofocus: true,
                               style: TextStyle(color: Colors.white),
                               controller: _textController,
                               keyboardType: TextInputType.name,
                               decoration: InputDecoration(
+                                counterText: "",
                                   hintText: "Enter IP",
                                   hintStyle: TextStyle(
                                       color: Colors.grey,
@@ -139,16 +147,15 @@ class _ipState extends State<ip> {
                     SizedBox(height: 5,),
                     ElevatedButton(
                         onPressed: () async{
-                          int response=await DB.insert("alnasikh",{
-                            "filename":"a",
-                            "PdfPath":"aaaaaa",
-                            "ImagePath":"assets/icons/play_store.png",
-                            "DATE":"2023-4-15"
+                          if(_textController.text.contains("https://")){
+                            selectedValue="https://";
                           }
-                          );
-                          print(response);
+                          _textController.text=_textController.text.replaceAll("http://", "").replaceAll("https://", "");
+                          var split=_textController.text.split(".");
+                          if(split[0]=="192")
+                            _textController.text=_textController.text+":5000";
                           send_ip(context, selectedValue+_textController.text);},
-                        child: Text("Send"))
+                        child: Text("Save"))
                   ],
                 ),
               ))),
