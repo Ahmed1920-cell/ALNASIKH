@@ -87,7 +87,8 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController edit_name = TextEditingController();
 
   _MyHomePageState(this.IP, this.Done, this.pdf_path);
-DateTime timeBackPressed=DateTime.now();
+
+  DateTime timeBackPressed = DateTime.now();
   List data = [];
   Sql DB = Sql();
 
@@ -133,10 +134,11 @@ DateTime timeBackPressed=DateTime.now();
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) =>
-                  imageView(
+              builder: (context) => imageView(
                     imagePath: image,
                     ip: IP,
+                    merge: false ,
+                    data: "",
                   )));
       //_scannedImage = image;
       setState(() {
@@ -149,20 +151,20 @@ DateTime timeBackPressed=DateTime.now();
     setState(() {
       temp = data
           .where((item) =>
-          item["filename"].toLowerCase().contains(query.toLowerCase()))
+              item["filename"].toLowerCase().contains(query.toLowerCase()))
           .toList();
       print(temp);
     });
   }
 
-  Future<File> saveImage(File _imageFile) async {
+  Future<File> ChangeFilename(File _imageFile) async {
     File ff = _imageFile;
     final bytes = await ff.readAsBytes();
     final directory = Directory((Platform.isAndroid
-        ? await getExternalStorageDirectory() //FOR ANDROID
-        : await getApplicationSupportDirectory() //FOR IOS
-    )!
-        .path +
+                ? await getExternalStorageDirectory() //FOR ANDROID
+                : await getApplicationSupportDirectory() //FOR IOS
+            )!
+            .path +
         '/recent/image');
     if ((await directory.exists())) {
       print("is exist");
@@ -191,10 +193,11 @@ DateTime timeBackPressed=DateTime.now();
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) =>
-                  imageView(
+              builder: (context) => imageView(
                     imagePath: image,
                     ip: IP,
+                merge: false ,
+                data: "",
                   )));
       //_scannedImage = image;
       setState(() {
@@ -213,20 +216,21 @@ DateTime timeBackPressed=DateTime.now();
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: ()async{
+      onWillPop: () async {
         print(timeBackPressed);
-        final difference=DateTime.now().difference(timeBackPressed);
+        final difference = DateTime.now().difference(timeBackPressed);
         print(difference.inMilliseconds);
-        final IsExistWarning=difference >= Duration(milliseconds: 900);
+        final IsExistWarning = difference >= Duration(milliseconds: 900);
         print(IsExistWarning);
-        timeBackPressed=DateTime.now();
-        if(IsExistWarning){
-          final message='Press back again to exit';
-          Fluttertoast.showToast(msg: message,fontSize: 16,backgroundColor: Color.fromRGBO(
-              80, 80, 80, 1.0));
+        timeBackPressed = DateTime.now();
+        if (IsExistWarning) {
+          final message = 'Press back again to exit';
+          Fluttertoast.showToast(
+              msg: message,
+              fontSize: 16,
+              backgroundColor: Color.fromRGBO(80, 80, 80, 1.0));
           return false;
-        }
-        else{
+        } else {
           return true;
         }
       },
@@ -236,51 +240,51 @@ DateTime timeBackPressed=DateTime.now();
           actions: [
             !IsSearch
                 ? IconButton(
-                onPressed: () {
-                  setState(() {
-                    IsSearch = true;
-                  });
-                },
-                icon: Icon(
-                  Icons.search,
-                  size: 30,
-                  color: Colors.white,
-                ))
+                    onPressed: () {
+                      setState(() {
+                        IsSearch = true;
+                      });
+                    },
+                    icon: Icon(
+                      Icons.search,
+                      size: 30,
+                      color: Colors.white,
+                    ))
                 : Padding(
-              padding: const EdgeInsets.all(5.0),
-              child: SizedBox(
-                width: 250,
-                child: TextField(
-                  style: TextStyle(color: Colors.black, fontSize: 17),
-                  onChanged: (value) {
-                    filterSearchResults(value);
-                  },
-                  controller: editingController,
-                  decoration: InputDecoration(
-                      contentPadding: EdgeInsets.all(14.0),
-                      fillColor: Colors.white,
-                      filled: true,
-                      hintText: "Search",
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            IsSearch = false;
-                            temp = data;
-                            editingController.text = "";
-                          });
+                    padding: const EdgeInsets.all(5.0),
+                    child: SizedBox(
+                      width: 250,
+                      child: TextField(
+                        style: TextStyle(color: Colors.black, fontSize: 17),
+                        onChanged: (value) {
+                          filterSearchResults(value);
                         },
-                        icon: Icon(
-                          Icons.close,
-                          color: Colors.blue,
-                          size: 30,
-                        ),
+                        controller: editingController,
+                        decoration: InputDecoration(
+                            contentPadding: EdgeInsets.all(14.0),
+                            fillColor: Colors.white,
+                            filled: true,
+                            hintText: "Search",
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  IsSearch = false;
+                                  temp = data;
+                                  editingController.text = "";
+                                });
+                              },
+                              icon: Icon(
+                                Icons.close,
+                                color: Colors.blue,
+                                size: 30,
+                              ),
+                            ),
+                            border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(15.0)))),
                       ),
-                      border: OutlineInputBorder(
-                          borderRadius:
-                          BorderRadius.all(Radius.circular(15.0)))),
-                ),
-              ),
-            ),
+                    ),
+                  ),
           ],
         ),
         body: InkWell(
@@ -341,10 +345,7 @@ DateTime timeBackPressed=DateTime.now();
                   Container(
                     alignment: Alignment.center,
                     color: Colors.black,
-                    height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * (516 / 736),
+                    height: MediaQuery.of(context).size.height * (516 / 736),
                     child: Column(
                       children: [
                         SizedBox(
@@ -363,639 +364,531 @@ DateTime timeBackPressed=DateTime.now();
                       ],
                     ),
                   )
+                else if (isLoading)
+                  Container(
+                    alignment: Alignment.center,
+                    color: Colors.black,
+                    height: MediaQuery.of(context).size.height * (516 / 736),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 200,
+                        ),
+                        Text("Loading...",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold))
+                      ],
+                    ),
+                  )
                 else
-                  if (isLoading)
-                    Container(
-                      alignment: Alignment.center,
-                      color: Colors.black,
-                      height: MediaQuery
-                          .of(context)
-                          .size
-                          .height * (516 / 736),
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            height: 200,
-                          ),
-                          Text("Loading...",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold))
-                        ],
-                      ),
-                    )
-                  else
-                    Container(
-                      color: Colors.black,
-                      //width: MediaQuery.of(context).size.height,
-                      alignment: (temp.length) < 3 ? Alignment.topLeft : null,
-                      height: (temp.length) < 3
-                          ? MediaQuery
-                          .of(context)
-                          .size
-                          .height * (520 / 736)
-                          : null,
-                      child: ListView.builder(
-                        reverse: true,
-                        padding: EdgeInsets.zero,
-                        shrinkWrap: true,
-                        //physics: AlwaysScrollableScrollPhysics(),
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: temp.length,
-                        itemBuilder: (context, i) =>
-                            Container(
-                              margin: const EdgeInsets.all(2.0),
-                              child: Column(
-                                children: [
-                                  Padding(
-                                    padding: (i != 0)
-                                        ? const EdgeInsets.fromLTRB(0, 0, 0, 10)
-                                        : const EdgeInsets.fromLTRB(
-                                        0, 0, 0, 50),
-                                    child: Card(
-                                      color: Colors.black,
-                                      clipBehavior: Clip.antiAliasWithSaveLayer,
-                                      shadowColor: Colors.blueAccent,
-                                      elevation: 10,
-                                      child: Row(
-                                        //mainAxisAlignment: MainAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                              margin: EdgeInsets.fromLTRB(
-                                                  5, 0, 0, 0),
-                                              /*decoration: BoxDecoration(
-                                            border:Border.all(color: Colors.black,width: 3),
-                                            borderRadius: BorderRadius.circular(5),
-                                            //Colors.grey.withOpacity(0.3)
-                                          ),*/
-                                              //child: Image.file(File("/storage/emulated/0/Android/data/com.example.untitled/files/recent/my.jpg"),width: 150,height: 90,fit: BoxFit.cover,),
-                                              child: ClipRRect(
-                                                borderRadius:
-                                                BorderRadius.circular(15.0),
-                                                child: Image.file(
-                                                  File(
-                                                      "${temp[i]["ImagePath"]}"),
-                                                  width: MediaQuery
-                                                      .of(context)
-                                                      .size
-                                                      .width *
-                                                      (103 / 360),
-                                                  height: MediaQuery
-                                                      .of(context)
-                                                      .size
-                                                      .height *
-                                                      (134 / 736),
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              )),
-                                          Expanded(
-                                            flex: 1,
-                                            child: Container(
+                  Container(
+                    color: Colors.black,
+                    //width: MediaQuery.of(context).size.height,
+                    alignment: (temp.length) < 3 ? Alignment.topLeft : null,
+                    height: (temp.length) < 3
+                        ? MediaQuery.of(context).size.height * (520 / 736)
+                        : null,
+                    child: ListView.builder(
+                      reverse: true,
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      //physics: AlwaysScrollableScrollPhysics(),
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: temp.length,
+                      itemBuilder: (context, i) => Container(
+                        margin: const EdgeInsets.all(2.0),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: (i != 0)
+                                  ? const EdgeInsets.fromLTRB(0, 0, 0, 10)
+                                  : const EdgeInsets.fromLTRB(0, 0, 0, 50),
+                              child: Card(
+                                color: Colors.black,
+                                clipBehavior: Clip.antiAliasWithSaveLayer,
+                                shadowColor: Colors.blueAccent,
+                                elevation: 10,
+                                child: Row(
+                                  //mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    //Container Image
+                                    Container(
+                                        margin: EdgeInsets.fromLTRB(5, 0, 0, 0),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(15.0),
+                                          child: Image.file(
+                                            File("${temp[i]["ImagePath"]}"),
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                (103 / 360),
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                (134 / 736),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        )),
+                                    Expanded(
+                                      flex: 1,
+                                      child: Container(
+                                        padding:
+                                            EdgeInsets.fromLTRB(5, 0, 0, 0),
+                                        //alignment: Alignment.center,
+                                        //color: Color.fromRGBO(140, 140, 140, 1.0),
+                                        color: Colors.black,
+                                        //width: 10,
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                (144 / 736),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Padding(
                                               padding:
-                                              EdgeInsets.fromLTRB(5, 0, 0, 0),
-                                              //alignment: Alignment.center,
-                                              //color: Color.fromRGBO(140, 140, 140, 1.0),
-                                              color: Colors.black,
-                                              //width: 10,
-                                              height:
-                                              MediaQuery
-                                                  .of(context)
-                                                  .size
-                                                  .height *
-                                                  (144 / 736),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Padding(
-                                                    padding:
-                                                    const EdgeInsets.all(4.0),
-                                                    child: Expanded(
-                                                      flex: 2,
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                        mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                        children: [
-                                                          if (!IsEdit ||
-                                                              id !=
-                                                                  temp[i]["id"])
-                                                            Padding(
-                                                              padding:
-                                                              const EdgeInsets
-                                                                  .fromLTRB(
-                                                                  0, 15, 0, 0),
-                                                              child: Text(
-                                                                "${temp[i]["filename"]}",
-                                                                style: TextStyle(
-                                                                    fontSize: 17,
-                                                                    color: Color
-                                                                        .fromRGBO(
-                                                                        245,
-                                                                        245,
-                                                                        245,
-                                                                        0.8666666666666667),
-                                                                    fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                              ),
-                                                            )
-                                                          else
-                                                            if (IsEdit &&
-                                                                id ==
-                                                                    temp[i]["id"])
-                                                              Padding(
-                                                                padding:
-                                                                const EdgeInsets
+                                                  const EdgeInsets.all(4.0),
+                                              child: Expanded(
+                                                flex: 2,
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    if (!IsEdit ||
+                                                        id != temp[i]["id"])
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
                                                                     .fromLTRB(
-                                                                    0, 5, 0, 0),
-                                                                child: Column(
-                                                                  children: [
-                                                                    SizedBox(
-                                                                      // <-- SEE HERE
-                                                                      width: MediaQuery
-                                                                          .of(
+                                                                0, 15, 0, 0),
+                                                        child: Text(
+                                                          "${temp[i]["filename"]}",
+                                                          style: TextStyle(
+                                                              fontSize: 17,
+                                                              color: Color.fromRGBO(
+                                                                  245,
+                                                                  245,
+                                                                  245,
+                                                                  0.8666666666666667),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                      )
+                                                    else if (IsEdit &&
+                                                        id == temp[i]["id"])
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .fromLTRB(
+                                                                0, 5, 0, 0),
+                                                        child: Column(
+                                                          children: [
+                                                            SizedBox(
+                                                              // <-- SEE HERE
+                                                              width: MediaQuery.of(
                                                                           context)
-                                                                          .size
-                                                                          .width *
-                                                                          (175 /
-                                                                              360),
-                                                                      height: MediaQuery
-                                                                          .of(
+                                                                      .size
+                                                                      .width *
+                                                                  (175 / 360),
+                                                              height: MediaQuery.of(
                                                                           context)
-                                                                          .size
-                                                                          .height *
-                                                                          (41 /
-                                                                              736),
-                                                                      child: Container(
-                                                                        padding:
-                                                                        EdgeInsets
-                                                                            .fromLTRB(
+                                                                      .size
+                                                                      .height *
+                                                                  (41 / 736),
+                                                              child: Container(
+                                                                padding:
+                                                                    EdgeInsets
+                                                                        .fromLTRB(
                                                                             10,
                                                                             0,
                                                                             0,
                                                                             0),
-                                                                        decoration:
-                                                                        BoxDecoration(
-                                                                          border: Border
-                                                                              .all(
-                                                                              color: Colors
-                                                                                  .blue,
-                                                                              width: 2),
-                                                                          borderRadius:
-                                                                          BorderRadius
-                                                                              .circular(
+                                                                decoration:
+                                                                    BoxDecoration(
+                                                                  border: Border.all(
+                                                                      color: Colors
+                                                                          .blue,
+                                                                      width: 2),
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
                                                                               15),
-                                                                        ),
-                                                                        child:
-                                                                        TextField(
-                                                                          onChanged:
-                                                                          OnChange
-                                                                              ? (
-                                                                              value) {
-                                                                            setState(() {
-                                                                              edit_name
-                                                                                  .text =
-                                                                                  value;
-                                                                              edit_name
-                                                                                  .selection =
-                                                                                  TextSelection
-                                                                                      .fromPosition(
-                                                                                      TextPosition(
-                                                                                          offset: edit_name
-                                                                                              .text
-                                                                                              .length));
-                                                                            });
-                                                                          }
-                                                                              : null,
-                                                                          maxLength: 22,
-                                                                          style: TextStyle(
-                                                                              color: Colors
-                                                                                  .white,
-                                                                              fontSize:
-                                                                              14),
-                                                                          controller:
-                                                                          edit_name,
-                                                                          keyboardType:
-                                                                          TextInputType
-                                                                              .name,
-                                                                          decoration: InputDecoration(
-                                                                              counterText:
-                                                                              '',
-                                                                              hintText:
-                                                                              "Enter Name",
-                                                                              hintStyle: TextStyle(
-                                                                                  color: Colors
-                                                                                      .grey,
-                                                                                  fontSize:
-                                                                                  14,
-                                                                                  fontWeight:
-                                                                                  FontWeight
-                                                                                      .bold)
-                                                                            //prefixStyle:TextStyle(color: Colors.white)
+                                                                ),
+                                                                child:
+                                                                    TextField(
+                                                                  onChanged:
+                                                                      OnChange
+                                                                          ? (value) {
+                                                                              setState(() {
+                                                                                edit_name.text = value;
+                                                                                edit_name.selection = TextSelection.fromPosition(TextPosition(offset: edit_name.text.length));
+                                                                              });
+                                                                            }
+                                                                          : null,
+                                                                  maxLength: 22,
+                                                                  style: TextStyle(
+                                                                      color: Colors.white,
+                                                                      fontSize: 14),
+                                                                  controller: edit_name,
+                                                                  keyboardType:
+                                                                      TextInputType
+                                                                          .name,
+                                                                  decoration: InputDecoration(
+                                                                      counterText: '',
+                                                                      hintText: "Enter Name",
+                                                                      hintStyle: TextStyle(
+                                                                          color: Colors.grey,
+                                                                          fontSize: 14,
+                                                                          fontWeight: FontWeight.bold)
+                                                                      //prefixStyle:TextStyle(color: Colors.white)
 
-                                                                          ),
-                                                                        ),
                                                                       ),
-                                                                    ),
-                                                                    if (IsExist)
-                                                                      Text(
-                                                                        "the name is exist",
-                                                                        style: TextStyle(
-                                                                            color: Colors
-                                                                                .red,
-                                                                            fontSize:
-                                                                            11),
-                                                                      )
-                                                                    else
-                                                                      if (IsEmpty)
-                                                                        Text(
-                                                                          "Please Enter the name",
-                                                                          style: TextStyle(
-                                                                              color: Colors
-                                                                                  .red,
-                                                                              fontSize:
-                                                                              11),
-                                                                        )
-                                                                  ],
                                                                 ),
                                                               ),
-                                                          SizedBox(
-                                                            height: 9,
-                                                          ),
-                                                          Text(
-                                                              "${temp[i]["DATE"]}                                  ",
-                                                              style: TextStyle(
-                                                                  fontSize: 14,
-                                                                  color:
-                                                                  Colors.grey)),
-                                                          /*TextButton(onPressed: (){}, child:Text("View pdf",style: TextStyle(fontSize: 15,color: Color.fromRGBO(
-                                                  3, 79, 124, 1.0),wordSpacing: 2),))*/
-                                                          Container(
-                                                            //alignment: Alignment.center,
-                                                            padding: const EdgeInsets
-                                                                .fromLTRB(
-                                                                25, 0, 0, 0),
-                                                            child: Row(
-                                                              children: [
-                                                                ElevatedButton(
-                                                                    style: ButtonStyle(
-                                                                        backgroundColor:
-                                                                        MaterialStatePropertyAll(Colors.black)),
-                                                                    onPressed: () {
-                                                                      Navigator.push(
-                                                                          context,
-                                                                          MaterialPageRoute(
-                                                                              builder: (context) =>
-                                                                                  document_view(
-                                                                                    MetaData: temp[i],
-                                                                                  )));
-                                                                    },
-                                                                    child: Text(
-                                                                      "View",
-                                                                      style: TextStyle(
-                                                                          fontSize: 15,
-                                                                          color: Color
-                                                                              .fromRGBO(
-                                                                              12,
-                                                                              100,
-                                                                              180,
-                                                                              1.0),
-                                                                          wordSpacing: 2),
-                                                                    )),
-                                                                ElevatedButton(
-                                                                    style: ButtonStyle(
-                                                                        backgroundColor:
-                                                                        MaterialStatePropertyAll(Colors.black)),
-                                                                    onPressed: () {
-                                                                      OpenFile.open(
-                                                                          "${temp[i]["PdfPath"]}");
-                                                                    },
-                                                                    child: Text(
-                                                                      "Open pdf",
-                                                                      style: TextStyle(
-                                                                          fontSize: 15,
-                                                                          color: Color
-                                                                              .fromRGBO(
-                                                                              12,
-                                                                              100,
-                                                                              180,
-                                                                              1.0),
-                                                                          wordSpacing: 2),
-                                                                    )),
-                                                              ],
                                                             ),
-                                                          )
-                                                          /*IconButton(onPressed: (){}, icon: Icon(Icons.picture_as_pdf,color: Color.fromRGBO(
-                                                  203, 26, 12, 1.0),))*/
+                                                            if (IsExist)
+                                                              Text(
+                                                                "the name is exist",
+                                                                style: TextStyle(
+                                                                    color: Colors.red,
+                                                                    fontSize: 11),
+                                                              )
+                                                            else if (IsEmpty)
+                                                              Text(
+                                                                "Please Enter the name",
+                                                                style: TextStyle(
+                                                                    color: Colors.red,
+                                                                    fontSize: 11),
+                                                              )
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    SizedBox(
+                                                      height: 9,
+                                                    ),
+                                                    Text(
+                                                        "${temp[i]["DATE"]}                                  ",
+                                                        style: TextStyle(
+                                                            fontSize: 14,
+                                                            color: Colors.grey)),
+                                                    /*TextButton(onPressed: (){}, child:Text("View pdf",style: TextStyle(fontSize: 15,color: Color.fromRGBO(
+                                                  3, 79, 124, 1.0),wordSpacing: 2),))*/
+                                                    Container(
+                                                      //alignment: Alignment.center,
+                                                      padding: const EdgeInsets.fromLTRB(25, 0, 0, 0),
+                                                      child: Row(
+                                                        children: [
+                                                          ElevatedButton(
+                                                              style: ButtonStyle(
+                                                                  backgroundColor:
+                                                                      MaterialStatePropertyAll(
+                                                                          Colors
+                                                                              .black)),
+                                                              onPressed: () {
+                                                                Navigator.push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                        builder: (context) =>
+                                                                            document_view(
+                                                                              MetaData: temp[i],
+                                                                              IP: IP,
+                                                                            ))).then((value) => setState(() {}));;
+                                                              },
+                                                              child: Text(
+                                                                "View",
+                                                                style: TextStyle(
+                                                                    fontSize: 15,
+                                                                    color: Color.fromRGBO(12, 100, 180, 1.0),
+                                                                    wordSpacing: 2),
+                                                              )),
+                                                          ElevatedButton(
+                                                              style: ButtonStyle(
+                                                                  backgroundColor:
+                                                                      MaterialStatePropertyAll(
+                                                                          Colors
+                                                                              .black)),
+                                                              onPressed: () {
+                                                                OpenFile.open(
+                                                                    "${temp[i]["PdfPath"]}");
+                                                              },
+                                                              child: Text(
+                                                                "Open pdf",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        15,
+                                                                    color: Color.fromRGBO(12, 100, 180, 1.0),
+                                                                    wordSpacing: 2),
+                                                              )),
                                                         ],
                                                       ),
-                                                    ),
-                                                  ),
-                                                  Expanded(
-                                                    flex: 1,
-                                                    child: Column(
-                                                      mainAxisSize: MainAxisSize
-                                                          .min,
-                                                      crossAxisAlignment:
-                                                      CrossAxisAlignment.end,
-                                                      //verticalDirection: VerticalDirection.down,
-                                                      children: [
-                                                        if (!IsEdit ||
-                                                            id != temp[i]["id"])
-                                                          ElevatedButton(
-                                                            onPressed: () {
-                                                              setState(() {
-                                                                IsExist = false;
-                                                                IsEmpty = false;
-                                                                IsEdit = true;
-                                                                OnChange =
-                                                                false;
-                                                                id =
-                                                                temp[i]["id"];
-                                                                edit_name.text =
-                                                                temp[i]
-                                                                ["filename"];
-                                                              });
-                                                            },
-                                                            child: Icon(
-                                                              Icons.edit,
-                                                              color: Colors
-                                                                  .blue,
-                                                            ),
-                                                            style: ElevatedButton
-                                                                .styleFrom(
-                                                              shape: CircleBorder(),
-                                                              backgroundColor:
-                                                              Colors.black,
-                                                              padding:
-                                                              EdgeInsets.zero,
-                                                              minimumSize: Size
-                                                                  .zero,
-                                                            ),
-                                                          )
-                                                        else
-                                                          if (IsEdit &&
-                                                              id ==
-                                                                  temp[i]["id"])
-                                                            ElevatedButton(
-                                                              onPressed: () async {
-                                                                setState(() {
-                                                                  OnChange =
-                                                                  true;
-                                                                });
-                                                                if (edit_name
-                                                                    .text
-                                                                    .isEmpty &&
-                                                                    OnChange) {
-                                                                  setState(() {
-                                                                    IsEmpty =
-                                                                    true;
-                                                                    IsExist =
-                                                                    false;
-                                                                    OnChange =
-                                                                    false;
-                                                                  });
-                                                                }
-                                                                if (edit_name
-                                                                    .text
-                                                                    .isNotEmpty &&
-                                                                    OnChange) {
-                                                                  File pdf_path =
-                                                                  await saveImage(
-                                                                      File(
-                                                                          temp[i][
-                                                                          "PdfPath"]));
-                                                                  int response =
-                                                                  await DB
-                                                                      .update(
-                                                                      "alnasikh",
-                                                                      {
-                                                                        "filename":
+                                                    )
+                                                    /*IconButton(onPressed: (){}, icon: Icon(Icons.picture_as_pdf,color: Color.fromRGBO(
+                                                  203, 26, 12, 1.0),))*/
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 1,
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                //verticalDirection: VerticalDirection.down,
+                                                children: [
+                                                  if (!IsEdit ||
+                                                      id != temp[i]["id"])
+                                                    ElevatedButton(
+                                                      onPressed: () {
+                                                        setState(() {
+                                                          IsExist = false;
+                                                          IsEmpty = false;
+                                                          IsEdit = true;
+                                                          OnChange = false;
+                                                          id = temp[i]["id"];
+                                                          edit_name.text =
+                                                              temp[i]
+                                                                  ["filename"];
+                                                        });
+                                                      },
+                                                      child: Icon(
+                                                        Icons.edit,
+                                                        color: Colors.blue,
+                                                      ),
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                        shape: CircleBorder(),
+                                                        backgroundColor:
+                                                            Colors.black,
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        minimumSize: Size.zero,
+                                                      ),
+                                                    )
+                                                  else if (IsEdit &&
+                                                      id == temp[i]["id"])
+                                                    ElevatedButton(
+                                                      onPressed: () async {
+                                                        setState(() {
+                                                          OnChange = true;
+                                                        });
+                                                        if (edit_name
+                                                                .text.isEmpty &&
+                                                            OnChange) {
+                                                          setState(() {
+                                                            IsEmpty = true;
+                                                            IsExist = false;
+                                                            OnChange = false;
+                                                          });
+                                                        }
+                                                        if (edit_name.text
+                                                                .isNotEmpty &&
+                                                            OnChange) {
+                                                          File pdf_path =
+                                                              await ChangeFilename(
+                                                                  File(temp[i][
+                                                                      "PdfPath"]));
+                                                          int response =
+                                                              await DB.update(
+                                                                  "alnasikh",
+                                                                  {
+                                                                    "filename":
                                                                         edit_name
                                                                             .text
                                                                             .trim(),
-                                                                        "PdfPath":
+                                                                    "PdfPath":
                                                                         pdf_path
                                                                             .path,
-                                                                        "ImagePath":
+                                                                    "ImagePath":
                                                                         temp[i][
-                                                                        "ImagePath"],
-                                                                        "DATE": temp[
-                                                                        i]
+                                                                            "ImagePath"],
+                                                                    "DATE": temp[
+                                                                            i]
                                                                         ["DATE"]
+                                                                  },
+                                                                  "id =${temp[i]["id"]} ");
+                                                          if (response > 0) {
+                                                            print(response);
+                                                            setState(() {
+                                                              IsEdit = false;
+                                                              IsExist = false;
+                                                              IsEmpty = false;
+                                                              OnChange = false;
+                                                            });
+                                                            Navigator.pushReplacement(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                    builder:
+                                                                        (_) {
+                                                              return MyHomePage(
+                                                                  IP,
+                                                                  widget.done,
+                                                                  "");
+                                                            }));
+                                                          } else {
+                                                            setState(() {
+                                                              IsEmpty = false;
+                                                              IsExist = true;
+                                                              OnChange = false;
+                                                            });
+                                                          }
+                                                        }
+                                                      },
+                                                      child: Icon(
+                                                        Icons.done,
+                                                        color: Colors.blue,
+                                                        size: 30,
+                                                      ),
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                        shape: CircleBorder(),
+                                                        backgroundColor:
+                                                            Colors.black,
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        minimumSize: Size.zero,
+                                                      ),
+                                                    ),
+                                                  ElevatedButton(
+                                                    onPressed: () => showDialog(
+                                                        context: context,
+                                                        builder:
+                                                            (BuildContext
+                                                                    ctx) =>
+                                                                AlertDialog(
+                                                                  elevation: 2,
+                                                                  shadowColor:
+                                                                      Colors
+                                                                          .blue,
+                                                                  clipBehavior:
+                                                                      Clip.hardEdge,
+                                                                  backgroundColor:
+                                                                      Colors
+                                                                          .black,
+                                                                  title: const Text(
+                                                                      'Delete'),
+                                                                  titleTextStyle: TextStyle(
+                                                                      color: Colors
+                                                                          .white,
+                                                                      fontSize:
+                                                                          18),
+                                                                  content:
+                                                                      const Text(
+                                                                          'Do you want to delete this item'),
+                                                                  contentTextStyle: TextStyle(
+                                                                      color: Colors
+                                                                          .white,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold),
+                                                                  actions: [
+                                                                    TextButton(
+                                                                      onPressed: () => Navigator.pop(
+                                                                          context,
+                                                                          'Cancel'),
+                                                                      child:
+                                                                          const Text(
+                                                                        'No',
+                                                                        style: TextStyle(
+                                                                            color:
+                                                                                Colors.blue),
+                                                                      ),
+                                                                    ),
+                                                                    TextButton(
+                                                                      onPressed:
+                                                                          () async {
+                                                                        int response = await DB.delete(
+                                                                            "alnasikh",
+                                                                            "id =${temp[i]["id"]} ");
+                                                                        if (response >
+                                                                            0) {
+                                                                          temp.removeWhere((element) =>
+                                                                              element["id"] ==
+                                                                              data[i]["id"]);
+                                                                          setState(
+                                                                              () {});
+                                                                          Navigator.pop(
+                                                                              context,
+                                                                              'Yes');
+                                                                        }
                                                                       },
-                                                                      "id =${temp[i]["id"]} ");
-                                                                  if (response >
-                                                                      0) {
-                                                                    print(
-                                                                        response);
-                                                                    setState(() {
-                                                                      IsEdit =
-                                                                      false;
-                                                                      IsExist =
-                                                                      false;
-                                                                      IsEmpty =
-                                                                      false;
-                                                                      OnChange =
-                                                                      false;
-                                                                    });
-                                                                    Navigator
-                                                                        .pushReplacement(
-                                                                        context,
-                                                                        MaterialPageRoute(
-                                                                            builder:
-                                                                                (
-                                                                                _) {
-                                                                              return MyHomePage(
-                                                                                  IP,
-                                                                                  widget
-                                                                                      .done,
-                                                                                  "");
-                                                                            }));
-                                                                  } else {
-                                                                    setState(() {
-                                                                      IsEmpty =
-                                                                      false;
-                                                                      IsExist =
-                                                                      true;
-                                                                      OnChange =
-                                                                      false;
-                                                                    });
-                                                                  }
-                                                                }
-                                                              },
-                                                              child: Icon(
-                                                                Icons.done,
-                                                                color: Colors
-                                                                    .blue,
-                                                                size: 30,
-                                                              ),
-                                                              style: ElevatedButton
-                                                                  .styleFrom(
-                                                                shape: CircleBorder(),
-                                                                backgroundColor:
-                                                                Colors.black,
-                                                                padding:
-                                                                EdgeInsets.zero,
-                                                                minimumSize: Size
-                                                                    .zero,
-                                                              ),
-                                                            ),
-                                                        ElevatedButton(
-                                                          onPressed: () =>
-                                                              showDialog(
-                                                                  context: context,
-                                                                  builder:
-                                                                      (
-                                                                      BuildContext
-                                                                      ctx) =>
-                                                                      AlertDialog(
-                                                                        elevation: 2,
-                                                                        shadowColor:
-                                                                        Colors
-                                                                            .blue,
-                                                                        clipBehavior:
-                                                                        Clip
-                                                                            .hardEdge,
-                                                                        backgroundColor:
-                                                                        Colors
-                                                                            .black,
-                                                                        title: const Text(
-                                                                            'Delete'),
-                                                                        titleTextStyle: TextStyle(
-                                                                            color: Colors
-                                                                                .white,
-                                                                            fontSize:
-                                                                            18),
-                                                                        content:
-                                                                        const Text(
-                                                                            'Do you want to delete this item'),
-                                                                        contentTextStyle: TextStyle(
-                                                                            color: Colors
-                                                                                .white,
-                                                                            fontWeight:
-                                                                            FontWeight
-                                                                                .bold),
-                                                                        actions: [
-                                                                          TextButton(
-                                                                            onPressed: () =>
-                                                                                Navigator
-                                                                                    .pop(
-                                                                                    context,
-                                                                                    'Cancel'),
-                                                                            child:
-                                                                            const Text(
-                                                                              'No',
-                                                                              style: TextStyle(
-                                                                                  color:
-                                                                                  Colors
-                                                                                      .blue),
-                                                                            ),
-                                                                          ),
-                                                                          TextButton(
-                                                                            onPressed:
-                                                                                () async {
-                                                                              int response = await DB
-                                                                                  .delete(
-                                                                                  "alnasikh",
-                                                                                  "id =${temp[i]["id"]} ");
-                                                                              if (response >
-                                                                                  0) {
-                                                                                temp
-                                                                                    .removeWhere((
-                                                                                    element) =>
-                                                                                element["id"] ==
-                                                                                    data[i]["id"]);
-                                                                                setState(
-                                                                                        () {});
-                                                                                Navigator
-                                                                                    .pop(
-                                                                                    context,
-                                                                                    'Yes');
-                                                                              }
-                                                                            },
-                                                                            child:
-                                                                            const Text(
-                                                                              'Yes',
-                                                                              style: TextStyle(
-                                                                                  color:
-                                                                                  Colors
-                                                                                      .blue),
-                                                                            ),
-                                                                          ),
-                                                                        ],
-                                                                      )),
-                                                          child: Icon(
-                                                            Icons.delete,
-                                                            color: Colors.blue,
-                                                          ),
-                                                          style: ElevatedButton
-                                                              .styleFrom(
-                                                            shape: CircleBorder(),
-                                                            backgroundColor:
-                                                            Colors.black,
-                                                            padding: EdgeInsets
-                                                                .zero,
-                                                            minimumSize: Size
-                                                                .zero,
-                                                          ),
-                                                        ),
-                                                        ElevatedButton(
-                                                          onPressed: () async {
-                                                            await Share
-                                                                .shareFiles([
-                                                              data[i]["PdfPath"]
-                                                            ],
-                                                                text: 'Great picture');
-                                                          },
-                                                          style: ElevatedButton
-                                                              .styleFrom(
-                                                            shape: CircleBorder(),
-                                                            backgroundColor:
-                                                            Colors.black,
-                                                            padding: EdgeInsets
-                                                                .zero,
-                                                            minimumSize: Size
-                                                                .zero,
-                                                          ),
-                                                          child: Icon(
-                                                            Icons.share,
-                                                            color: Colors.blue,
-                                                          ),
-                                                        ),
-                                                      ],
+                                                                      child:
+                                                                          const Text(
+                                                                        'Yes',
+                                                                        style: TextStyle(
+                                                                            color:
+                                                                                Colors.blue),
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                )),
+                                                    child: Icon(
+                                                      Icons.delete,
+                                                      color: Colors.blue,
+                                                    ),
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      shape: CircleBorder(),
+                                                      backgroundColor:
+                                                          Colors.black,
+                                                      padding: EdgeInsets.zero,
+                                                      minimumSize: Size.zero,
+                                                    ),
+                                                  ),
+                                                  ElevatedButton(
+                                                    onPressed: () async {
+                                                      await Share.shareFiles([
+                                                        data[i]["PdfPath"]
+                                                      ], text: 'Great Pdf');
+                                                    },
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      shape: CircleBorder(),
+                                                      backgroundColor:
+                                                          Colors.black,
+                                                      padding: EdgeInsets.zero,
+                                                      minimumSize: Size.zero,
+                                                    ),
+                                                    child: Icon(
+                                                      Icons.share,
+                                                      color: Colors.blue,
                                                     ),
                                                   ),
                                                 ],
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
+                          ],
+                        ),
                       ),
-                    )
+                    ),
+                  )
               ],
             ),
           ),
         ),
         floatingActionButton: FabCircularMenu(
             fabOpenIcon: Icon(Icons.add),
-            //animationCurve: Curves.easeInOutCirc,
+            animationCurve: Curves.easeInOutCirc,
             alignment: Alignment.bottomRight,
             ringColor: Colors.blue.withAlpha(25),
-            ringDiameter: 380.0,
-            ringWidth: 100.0,
+            ringDiameter: 390.0,
+            ringWidth: 90.0,
             fabSize: 55.0,
             fabElevation: 8.0,
             fabIconBorder: CircleBorder(),
@@ -1011,8 +904,9 @@ DateTime timeBackPressed=DateTime.now();
                 child: Icon(
                   Icons.settings,
                   size: 30.0,
+                  color: Colors.white,
                 ),
-                padding: EdgeInsets.all(14.0),
+                padding: EdgeInsets.all(12.0),
                 shape: CircleBorder(),
               ),
               RawMaterialButton(
@@ -1025,50 +919,7 @@ DateTime timeBackPressed=DateTime.now();
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => pdf_scan(doc, i, IP)));
-                    /*PdfPage page = await doc.getPage(1);
-                    PdfPageImage pageImage = await page.render(
-                      width: page.width.toInt(),
-                      height: page.height.toInt(),
-                    );
-                    //final image=img.Image.fromBytes(width: page.width.toInt(), height: page.height.toInt(), bytes: pageImage.imageIfAvailable)
-                    //final imageWidget = pageImage.pixels;
-                    await pageImage.createImageIfNotAvailable();
-                    var image = pageImage.imageIfAvailable;
-                    if (image != null) {
-                      final directory =
-                          await getApplicationDocumentsDirectory();
-                      final imagePath = '${directory.path}/my_image.jpg';
-
-                      ByteData? imageBytes = await image.toByteData(
-                          format: ui.ImageByteFormat.png);
-                      if (imageBytes != null) {
-                        final compressedImageBytes =
-                            await FlutterImageCompress.compressWithList(
-                          imageBytes.buffer.asUint8List(),
-                          minHeight: 800,
-                          minWidth: 800,
-                        );
-
-                        final file = File(imagePath);
-                        await file.writeAsBytes(compressedImageBytes);
-                        print("MMMMMMMMMMMMMMMMMMMMMMMMMM");
-                        print(file.path);
-                        //Navigator.push(context,MaterialPageRoute(builder: (context) => imageView(imagePath:file,ip:IP)));
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => crop(file, IP)));
-                      }
-                    }
-                    //print(pageImage.imageIfAvailable.toByteData(format: ImageByteFormat.rawRgba));
-                    //Navigator.push(context,MaterialPageRoute(builder: (context) => imageView(imagePath:pageImage.imageIfAvailable,ip:IP)));
-                    // print(imageWidget);
-                    print(path.path);
-                  }*/
-                    //return RawImage(image: pageImage.imageIfAvailable, fit: BoxFit.contain);
-                    //await pageImage.writeAsBytes(File('path/to/image/file').readAsBytesSync());
-                    //imageView(imagePath:imageFile.path,ip:"192.168.1.1");
+                            builder: (context) => pdf_scan(doc, i, IP,false,"")));
                     print(path);
                   }
                 },
@@ -1077,30 +928,33 @@ DateTime timeBackPressed=DateTime.now();
                 child: Icon(
                   Icons.picture_as_pdf,
                   size: 30.0,
+                  color: Colors.white,
                 ),
-                padding: EdgeInsets.all(14.0),
+                padding: EdgeInsets.all(12.0),
                 shape: CircleBorder(),
               ),
               CircleAvatar(
-                radius: 28,
-                backgroundColor: Colors.purple,
+                radius: 26,
+                backgroundColor: Color.fromRGBO(74, 40, 168, 1.0),
                 child: IconButton(
                     icon: Icon(
                       Icons.photo_library_sharp,
                       size: 30,
+                      color: Colors.white,
                     ),
                     onPressed: () {
                       openGalleryScanner(context, IP);
                     }),
               ),
               CircleAvatar(
-                radius: 28,
+                radius: 26,
                 backgroundColor: Colors.deepOrange,
                 child: IconButton(
                     icon: Icon(
                       Icons.camera_alt,
-                      color: Colors.black,
+                      color: Colors.white,
                       size: 30,
+
                     ),
                     onPressed: () {
                       openCameraScanner(context, IP);

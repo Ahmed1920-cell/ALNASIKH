@@ -10,12 +10,12 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'crop.dart';
 
 class pdf_scan extends StatefulWidget {
-  pdf_scan(this.doc, this.count, this.IP);
-
+  pdf_scan(this.doc, this.count, this.IP,this.merge,this.data);
+final merge;
   final doc;
   final count;
   final IP;
-
+final data;
   @override
   State<pdf_scan> createState() => _pdf_scanState();
 }
@@ -200,7 +200,7 @@ class _pdf_scanState extends State<pdf_scan> {
               } else {
                 Navigator.push(context, MaterialPageRoute(builder: (_) {
                   return crop(imagefile[int.parse(_textController.text) - 1],
-                      widget.IP);
+                      widget.IP,widget.merge,widget.data);
                 }));
               }
             },

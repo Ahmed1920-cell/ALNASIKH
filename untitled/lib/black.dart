@@ -7,7 +7,9 @@ import 'package:ALNASIKH/OCR_Result.dart';
 class blacks extends StatefulWidget {
   final image;
   final ip;
-  blacks(this.image,this.ip);
+  final merge;
+  final data;
+  blacks(this.image,this.ip,this.merge,this.data);
   @override
   State<blacks> createState() => _blacks(image,ip);
 }
@@ -73,7 +75,7 @@ class _blacks extends State<blacks> {
                       MaterialStatePropertyAll(Colors.blue),
                       minimumSize: MaterialStatePropertyAll(Size.fromHeight(40))),
                   onPressed: () {
-                    Navigator.push(context,MaterialPageRoute(builder: (context) => imageView(imagePath:_imageFile,ip:IP)));
+                    Navigator.push(context,MaterialPageRoute(builder: (context) => imageView(imagePath:_imageFile,ip:IP,merge: widget.merge,data: widget.data,)));
                   },
                   child: Text("Done",
                       style: TextStyle(color: Colors.white))),

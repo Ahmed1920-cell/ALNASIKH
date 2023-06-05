@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-class Sql{
+class unmerge{
   static Database? _db;
   Future<Database?> get db async{
     if (_db==null){
@@ -13,20 +13,20 @@ class Sql{
   }
   intialDB() async{
     String databasepath=await getDatabasesPath();
-    String path=join(databasepath,'ALNASIKH.db');
+    String path=join(databasepath,'unmerge.db');
     Database mydb=await openDatabase(path,onCreate: _onCreate,version: 1);
     return mydb;
   }
   _onCreate(Database db,int version) async{
     await db.execute('''
-    CREATE TABLE alnasikh(
+    CREATE TABLE unmerge(
     id INTEGER PRIMARY KEY AUTOINCREMENT ,
-    filename TEXT NOT NULL UNIQUE,
+    filename TEXT NOT NULL ,
     PdfPath TEXT NOT NULL,
     ImagePath TEXT NOT NULL,
     Sentence TEXT NOT NULL,
     DATE TEXT NOT NULL,
-    Merge INTEGER NOT NULL
+    MergeID INTEGER NOT NULL
     )
     ''');
     print("Create");
@@ -36,7 +36,7 @@ class Sql{
     Database? mydb=await db;
     List<Map> response =[];
     try{
-     response=await mydb!.query(sql);
+      response=await mydb!.query(sql);
     }
     catch(e){
       print("can't");
@@ -61,9 +61,9 @@ class Sql{
       int response =await mydb!.update(table,values,where: mywhere);
       return response;
     }
-catch(e){
+    catch(e){
       return 0;
-}
+    }
   }
   delete (String table ,String? mywhere) async{
     Database? mydb=await db;

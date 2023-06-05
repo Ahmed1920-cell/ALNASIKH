@@ -6,7 +6,9 @@ import 'package:ALNASIKH/black.dart';
 class crop extends StatefulWidget {
   final image;
   final ip;
-  crop(this.image,this.ip);
+  final merge;
+  final data;
+  crop(this.image,this.ip,this.merge,this.data);
   @override
   State<crop> createState() => _cropState(image,ip);
 }
@@ -23,7 +25,7 @@ class _cropState extends State<crop> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         actions: [IconButton(onPressed: (){
-        Navigator.push(context,MaterialPageRoute(builder: (context) => blacks(_imageFile,IP)));
+        Navigator.push(context,MaterialPageRoute(builder: (context) => blacks(_imageFile,IP,widget.merge,widget.data)));
       }, icon: Icon(Icons.done_outline,color: Colors.blue,))],
       ),
       body:Container(

@@ -1,3 +1,4 @@
+import 'package:ALNASIKH/unmerge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
@@ -15,17 +16,21 @@ import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 import 'main.dart';
 import 'sql.dart';
+import 'package:pdf_merger/pdf_merger.dart';
 class imageView extends StatefulWidget {
-  imageView({super.key, required this.imagePath, required this.ip});
+  imageView({super.key, required this.imagePath, required this.ip,this.merge,this.data});
 
   final imagePath;
   final ip;
+  final merge;
+  final data;
   @override
   State<imageView> createState() => _imageViewState(imagePath, ip);
 }
 
 class _imageViewState extends State<imageView> {
   Sql DB=Sql();
+  unmerge DB_unmerge=unmerge();
   var filename;
   _imageViewState(this.imageFile, this.IP);
   bool done=false;
@@ -310,14 +315,65 @@ String pdf_path="";
                   DateTime tsdate = DateTime.fromMillisecondsSinceEpoch(timestamp);
                   String datetime = tsdate.year.toString() + "-" + tsdate.month.toString() + "-" + tsdate.day.toString();
                 File save_image=await saveImage(imageFile);
-                DB.insert("alnasikh",{
+                if(widget.merge){
+                  if(widget.data["Merge"]==0){
+                    DB_unmerge.insert("unmerge", {
+                        "filename":widget.data["filename"],
+                        "PdfPath":widget.data["PdfPath"],
+                        "ImagePath":widget.data["ImagePath"],
+                        "DATE":widget.data["DATE"],
+                        "Sentence":widget.data["Sentence"],
+                        "MergeID":widget.data["id"]
+
+                    });
+                  }
+                  DB_unmerge.insert("unmerge", {
+                    "filename":filename,
+                    "PdfPath":pdf_path,
+                    "ImagePath":save_image.path,
+                    "DATE":datetime,
+                    "Sentence":chr,
+                    "MergeID":widget.data["id"]
+
+                  });
+                  var tempDir=Directory((Platform.isAndroid
+                      ? await getExternalStorageDirectory() //FOR ANDROID
+                      : await getApplicationSupportDirectory() //FOR IOS
+                  )!
+                      .path + '/recent/PDF');
+                  var status = await Permission.storage.status;
+                  if (!status.isGranted) {
+                    await Permission.storage.request();
+                  }
+                  if ((await tempDir.exists())) {
+                    print("is exist");
+                  } else {
+                    tempDir.create(recursive: true);
+                    print("is create");
+                  }
+                  var outputDirPath=tempDir.path + "/merge_$filename.pdf";
+                  List<String> filesPath=[];
+                  filesPath.add(widget.data["PdfPath"]);
+                  filesPath.add(pdf_path);
+                  MergeMultiplePDFResponse response  = await PdfMerger.mergeMultiplePDF(paths: filesPath, outputDirPath: outputDirPath);
+                  Object pdf=response.response as Object;
+                  DB.update("alnasikh",{
+                    "PdfPath":pdf,
+                    "Merge":1
+                  },
+                      "id =${widget.data["id"]} "
+                  );
+
+                }
+               else{ DB.insert("alnasikh",{
                   "filename":filename,
                   "PdfPath":pdf_path,
                   "ImagePath":save_image.path,
                   "DATE":datetime,
-                  "Sentence":chr
+                  "Sentence":chr,
+                  "Merge":0
                 }
-                );
+                );}
                   Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_){
                     return MyHomePage(IP,done,pdf_path);
                   }),
