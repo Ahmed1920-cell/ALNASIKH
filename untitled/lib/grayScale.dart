@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as ui;
 import 'package:flutter/material.dart';
@@ -42,15 +43,22 @@ class _blacks extends State<blacks> {
           backgroundColor: Colors.black,
           actions:[
             TextButton.icon(onPressed: () async{
-              var w=await saveImage(_imageFile);
-              setState(() {
-                if(!black)
-                white=_imageFile;
-                _imageFile=w;
-                print(_imageFile);
-                print(white);
-                black=true;
-              });  }, icon: Icon(Icons.water_drop_outlined),label: Text("Black & white")),
+              try{
+                var w=await saveImage(_imageFile);
+                setState(() {
+                  if(!black)
+                    white=_imageFile;
+                  _imageFile=w;
+                  print(_imageFile);
+                  print(white);
+                  black=true;
+                });
+              }
+              catch(e){
+                Fluttertoast.showToast(msg: "Try Again",fontSize: 14,backgroundColor: Color.fromRGBO(
+                    80, 80, 80, 1.0));
+              }
+                  }, icon: Icon(Icons.water_drop_outlined),label: Text("Black & white")),
             TextButton.icon(onPressed: () { setState(() {
               black=false;
               _imageFile=white;

@@ -110,8 +110,6 @@ class _pdf_scanState extends State<pdf_scan> {
                                         fontSize: 22)),
                                 InteractiveViewer(
                                     panEnabled: false,
-                                    // Set it to false
-                                    // boundaryMargin: EdgeInsets.all(100),
                                     minScale: 1,
                                     maxScale: 4,
                                     child: Image.file(
@@ -152,7 +150,6 @@ class _pdf_scanState extends State<pdf_scan> {
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.blue, width: 5),
                       borderRadius: BorderRadius.circular(25),
-                      //Colors.grey.withOpacity(0.3)
                     ),
                     child: SizedBox(
                       // <-- SEE HERE

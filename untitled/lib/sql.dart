@@ -29,6 +29,19 @@ class Sql{
     Merge INTEGER NOT NULL
     )
     ''');
+
+    await db.execute('''
+    CREATE TABLE unmerged(
+    id INTEGER PRIMARY KEY AUTOINCREMENT ,
+    filename TEXT NOT NULL ,
+    PdfPath TEXT NOT NULL,
+    ImagePath TEXT NOT NULL,
+    Sentence TEXT NOT NULL,
+    DATE TEXT NOT NULL,
+    MergeID INTEGER NOT NULL,
+    FOREIGN KEY(MergeID) REFERENCES alnasikh(id)
+    )
+    ''');
     print("Create");
   }
 

@@ -91,16 +91,26 @@ class _MyHomePageState extends State<MyHomePage> {
   DateTime timeBackPressed = DateTime.now();
   List data = [];
   Sql DB = Sql();
+  List unmerged=[];
 
   readData() async {
     List<Map> response = await DB.read("alnasikh");
     data.addAll(response);
+    List<Map> res = await DB.read("unmerged");
+    unmerged.addAll(res);
     if (this.mounted) {
       setState(() {
         isLoading = false;
       });
+      if(data.isEmpty &&!isLoading ){
+        unmerged.forEach((element) async{
+          print(element);
+          int response = await DB.delete("unmerged",
+              "id =${element["id"]} "); print(response); });
+      }
     }
-    print(data.length);
+    print(data);
+    print(unmerged);
   }
 
   bool isCamera = false;
@@ -137,7 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
               builder: (context) => imageView(
                     imagePath: image,
                     ip: IP,
-                    merge: false ,
+                    merge: false,
                     data: "",
                   )));
       //_scannedImage = image;
@@ -196,8 +206,8 @@ class _MyHomePageState extends State<MyHomePage> {
               builder: (context) => imageView(
                     imagePath: image,
                     ip: IP,
-                merge: false ,
-                data: "",
+                    merge: false,
+                    data: "",
                   )));
       //_scannedImage = image;
       setState(() {
@@ -322,7 +332,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     )),
                 Container(
                   decoration: BoxDecoration(
-                    //border:Border.all(color: Colors.grey,width: 5),
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(30),
                         topRight: Radius.circular(30)),
@@ -394,7 +403,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       reverse: true,
                       padding: EdgeInsets.zero,
                       shrinkWrap: true,
-                      //physics: AlwaysScrollableScrollPhysics(),
                       physics: NeverScrollableScrollPhysics(),
                       itemCount: temp.length,
                       itemBuilder: (context, i) => Container(
@@ -411,7 +419,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                 shadowColor: Colors.blueAccent,
                                 elevation: 10,
                                 child: Row(
-                                  //mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     //Container Image
                                     Container(
@@ -437,10 +444,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       child: Container(
                                         padding:
                                             EdgeInsets.fromLTRB(5, 0, 0, 0),
-                                        //alignment: Alignment.center,
-                                        //color: Color.fromRGBO(140, 140, 140, 1.0),
                                         color: Colors.black,
-                                        //width: 10,
                                         height:
                                             MediaQuery.of(context).size.height *
                                                 (144 / 736),
@@ -492,7 +496,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                                         child: Column(
                                                           children: [
                                                             SizedBox(
-                                                              // <-- SEE HERE
                                                               width: MediaQuery.of(
                                                                           context)
                                                                       .size
@@ -535,20 +538,27 @@ class _MyHomePageState extends State<MyHomePage> {
                                                                           : null,
                                                                   maxLength: 22,
                                                                   style: TextStyle(
-                                                                      color: Colors.white,
-                                                                      fontSize: 14),
-                                                                  controller: edit_name,
+                                                                      color: Colors
+                                                                          .white,
+                                                                      fontSize:
+                                                                          14),
+                                                                  controller:
+                                                                      edit_name,
                                                                   keyboardType:
                                                                       TextInputType
                                                                           .name,
                                                                   decoration: InputDecoration(
-                                                                      counterText: '',
-                                                                      hintText: "Enter Name",
+                                                                      counterText:
+                                                                          '',
+                                                                      hintText:
+                                                                          "Enter Name",
                                                                       hintStyle: TextStyle(
-                                                                          color: Colors.grey,
-                                                                          fontSize: 14,
-                                                                          fontWeight: FontWeight.bold)
-                                                                      //prefixStyle:TextStyle(color: Colors.white)
+                                                                          color: Colors
+                                                                              .grey,
+                                                                          fontSize:
+                                                                              14,
+                                                                          fontWeight:
+                                                                              FontWeight.bold)
 
                                                                       ),
                                                                 ),
@@ -558,15 +568,19 @@ class _MyHomePageState extends State<MyHomePage> {
                                                               Text(
                                                                 "the name is exist",
                                                                 style: TextStyle(
-                                                                    color: Colors.red,
-                                                                    fontSize: 11),
+                                                                    color: Colors
+                                                                        .red,
+                                                                    fontSize:
+                                                                        11),
                                                               )
                                                             else if (IsEmpty)
                                                               Text(
                                                                 "Please Enter the name",
                                                                 style: TextStyle(
-                                                                    color: Colors.red,
-                                                                    fontSize: 11),
+                                                                    color: Colors
+                                                                        .red,
+                                                                    fontSize:
+                                                                        11),
                                                               )
                                                           ],
                                                         ),
@@ -578,12 +592,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                                         "${temp[i]["DATE"]}                                  ",
                                                         style: TextStyle(
                                                             fontSize: 14,
-                                                            color: Colors.grey)),
-                                                    /*TextButton(onPressed: (){}, child:Text("View pdf",style: TextStyle(fontSize: 15,color: Color.fromRGBO(
-                                                  3, 79, 124, 1.0),wordSpacing: 2),))*/
+                                                            color:
+                                                                Colors.grey)),
                                                     Container(
-                                                      //alignment: Alignment.center,
-                                                      padding: const EdgeInsets.fromLTRB(25, 0, 0, 0),
+                                                      padding: const EdgeInsets
+                                                              .fromLTRB(
+                                                          25, 0, 0, 0),
                                                       child: Row(
                                                         children: [
                                                           ElevatedButton(
@@ -600,14 +614,25 @@ class _MyHomePageState extends State<MyHomePage> {
                                                                             document_view(
                                                                               MetaData: temp[i],
                                                                               IP: IP,
-                                                                            ))).then((value) => setState(() {}));;
+                                                                            ))).then(
+                                                                    (value) =>
+                                                                        setState(
+                                                                            () {}));
+                                                                ;
                                                               },
                                                               child: Text(
                                                                 "View",
                                                                 style: TextStyle(
-                                                                    fontSize: 15,
-                                                                    color: Color.fromRGBO(12, 100, 180, 1.0),
-                                                                    wordSpacing: 2),
+                                                                    fontSize:
+                                                                        15,
+                                                                    color: Color
+                                                                        .fromRGBO(
+                                                                            12,
+                                                                            100,
+                                                                            180,
+                                                                            1.0),
+                                                                    wordSpacing:
+                                                                        2),
                                                               )),
                                                           ElevatedButton(
                                                               style: ButtonStyle(
@@ -624,8 +649,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                                                 style: TextStyle(
                                                                     fontSize:
                                                                         15,
-                                                                    color: Color.fromRGBO(12, 100, 180, 1.0),
-                                                                    wordSpacing: 2),
+                                                                    color: Color
+                                                                        .fromRGBO(
+                                                                            12,
+                                                                            100,
+                                                                            180,
+                                                                            1.0),
+                                                                    wordSpacing:
+                                                                        2),
                                                               )),
                                                         ],
                                                       ),
@@ -642,7 +673,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 mainAxisSize: MainAxisSize.min,
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.end,
-                                                //verticalDirection: VerticalDirection.down,
                                                 children: [
                                                   if (!IsEdit ||
                                                       id != temp[i]["id"])
@@ -654,65 +684,43 @@ class _MyHomePageState extends State<MyHomePage> {
                                                           IsEdit = true;
                                                           OnChange = false;
                                                           id = temp[i]["id"];
-                                                          edit_name.text =
-                                                              temp[i]
-                                                                  ["filename"];
+                                                          edit_name.text = temp[i]["filename"];
                                                         });
                                                       },
                                                       child: Icon(
                                                         Icons.edit,
                                                         color: Colors.blue,
                                                       ),
-                                                      style: ElevatedButton
-                                                          .styleFrom(
+                                                      style: ElevatedButton.styleFrom(
                                                         shape: CircleBorder(),
-                                                        backgroundColor:
-                                                            Colors.black,
-                                                        padding:
-                                                            EdgeInsets.zero,
+                                                        backgroundColor: Colors.black,
+                                                        padding: EdgeInsets.zero,
                                                         minimumSize: Size.zero,
                                                       ),
                                                     )
-                                                  else if (IsEdit &&
-                                                      id == temp[i]["id"])
+                                                  else if (IsEdit && id == temp[i]["id"])
                                                     ElevatedButton(
                                                       onPressed: () async {
                                                         setState(() {
                                                           OnChange = true;
                                                         });
-                                                        if (edit_name
-                                                                .text.isEmpty &&
-                                                            OnChange) {
+                                                        if (edit_name.text.isEmpty && OnChange) {
                                                           setState(() {
                                                             IsEmpty = true;
                                                             IsExist = false;
                                                             OnChange = false;
                                                           });
                                                         }
-                                                        if (edit_name.text
-                                                                .isNotEmpty &&
-                                                            OnChange) {
+                                                        if (edit_name.text.isNotEmpty && OnChange) {
                                                           File pdf_path =
-                                                              await ChangeFilename(
-                                                                  File(temp[i][
-                                                                      "PdfPath"]));
+                                                              await ChangeFilename(File(temp[i]["PdfPath"]));
                                                           int response =
-                                                              await DB.update(
-                                                                  "alnasikh",
+                                                              await DB.update("alnasikh",
                                                                   {
-                                                                    "filename":
-                                                                        edit_name
-                                                                            .text
-                                                                            .trim(),
-                                                                    "PdfPath":
-                                                                        pdf_path
-                                                                            .path,
-                                                                    "ImagePath":
-                                                                        temp[i][
-                                                                            "ImagePath"],
-                                                                    "DATE": temp[
-                                                                            i]
-                                                                        ["DATE"]
+                                                                    "filename": edit_name.text.trim(),
+                                                                    "PdfPath": pdf_path.path,
+                                                                    "ImagePath": temp[i]["ImagePath"],
+                                                                    "DATE": temp[i]["DATE"]
                                                                   },
                                                                   "id =${temp[i]["id"]} ");
                                                           if (response > 0) {
@@ -726,8 +734,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                                             Navigator.pushReplacement(
                                                                 context,
                                                                 MaterialPageRoute(
-                                                                    builder:
-                                                                        (_) {
+                                                                    builder: (_) {
                                                               return MyHomePage(
                                                                   IP,
                                                                   widget.done,
@@ -750,10 +757,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                                       style: ElevatedButton
                                                           .styleFrom(
                                                         shape: CircleBorder(),
-                                                        backgroundColor:
-                                                            Colors.black,
-                                                        padding:
-                                                            EdgeInsets.zero,
+                                                        backgroundColor: Colors.black,
+                                                        padding: EdgeInsets.zero,
                                                         minimumSize: Size.zero,
                                                       ),
                                                     ),
@@ -761,71 +766,50 @@ class _MyHomePageState extends State<MyHomePage> {
                                                     onPressed: () => showDialog(
                                                         context: context,
                                                         builder:
-                                                            (BuildContext
-                                                                    ctx) =>
+                                                            (BuildContext ctx) =>
                                                                 AlertDialog(
                                                                   elevation: 2,
-                                                                  shadowColor:
-                                                                      Colors
-                                                                          .blue,
-                                                                  clipBehavior:
-                                                                      Clip.hardEdge,
-                                                                  backgroundColor:
-                                                                      Colors
-                                                                          .black,
-                                                                  title: const Text(
-                                                                      'Delete'),
+                                                                  shadowColor: Colors.blue,
+                                                                  clipBehavior: Clip.hardEdge,
+                                                                  backgroundColor: Colors.black,
+                                                                  title: const Text('Delete'),
                                                                   titleTextStyle: TextStyle(
-                                                                      color: Colors
-                                                                          .white,
-                                                                      fontSize:
-                                                                          18),
-                                                                  content:
-                                                                      const Text(
-                                                                          'Do you want to delete this item'),
+                                                                      color: Colors.white,
+                                                                      fontSize: 18),
+                                                                  content: const Text('Do you want to delete this item'),
                                                                   contentTextStyle: TextStyle(
-                                                                      color: Colors
-                                                                          .white,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold),
+                                                                      color: Colors.white,
+                                                                      fontWeight: FontWeight.bold),
                                                                   actions: [
                                                                     TextButton(
-                                                                      onPressed: () => Navigator.pop(
-                                                                          context,
-                                                                          'Cancel'),
-                                                                      child:
-                                                                          const Text(
-                                                                        'No',
+                                                                      onPressed: () => Navigator.pop(context, 'Cancel'),
+                                                                      child: const Text('No',
                                                                         style: TextStyle(
                                                                             color:
                                                                                 Colors.blue),
                                                                       ),
                                                                     ),
                                                                     TextButton(
-                                                                      onPressed:
-                                                                          () async {
-                                                                        int response = await DB.delete(
-                                                                            "alnasikh",
+                                                                      onPressed: () async {
+                                                                        unmerged=unmerged.where((element) => element["MergeID"]==temp[i]["id"]).toList();
+                                                                        unmerged.forEach((element) async{
+                                                                          print(element);
+                                                                          int response = await DB.delete("unmerged",
+                                                                            "id =${element["id"]} "); print(response); });
+                                                                        int response = await DB.delete("alnasikh",
                                                                             "id =${temp[i]["id"]} ");
-                                                                        if (response >
-                                                                            0) {
+                                                                        if (response > 0) {
                                                                           temp.removeWhere((element) =>
-                                                                              element["id"] ==
-                                                                              data[i]["id"]);
-                                                                          setState(
-                                                                              () {});
-                                                                          Navigator.pop(
-                                                                              context,
-                                                                              'Yes');
+                                                                              element["id"] == data[i]["id"]);
+                                                                          setState(() {});
+
+                                                                          Navigator.pop(context, 'Yes');
                                                                         }
                                                                       },
                                                                       child:
-                                                                          const Text(
-                                                                        'Yes',
+                                                                          const Text('Yes',
                                                                         style: TextStyle(
-                                                                            color:
-                                                                                Colors.blue),
+                                                                            color: Colors.blue),
                                                                       ),
                                                                     ),
                                                                   ],
@@ -834,26 +818,23 @@ class _MyHomePageState extends State<MyHomePage> {
                                                       Icons.delete,
                                                       color: Colors.blue,
                                                     ),
-                                                    style: ElevatedButton
-                                                        .styleFrom(
+                                                    style: ElevatedButton.styleFrom(
                                                       shape: CircleBorder(),
-                                                      backgroundColor:
-                                                          Colors.black,
+                                                      backgroundColor: Colors.black,
                                                       padding: EdgeInsets.zero,
                                                       minimumSize: Size.zero,
                                                     ),
                                                   ),
                                                   ElevatedButton(
                                                     onPressed: () async {
-                                                      await Share.shareFiles([
-                                                        data[i]["PdfPath"]
-                                                      ], text: 'Great Pdf');
+                                                      await Share.shareFiles(
+                                                          [data[i]["PdfPath"]],
+                                                          text: 'Great Pdf');
                                                     },
                                                     style: ElevatedButton
                                                         .styleFrom(
                                                       shape: CircleBorder(),
-                                                      backgroundColor:
-                                                          Colors.black,
+                                                      backgroundColor: Colors.black,
                                                       padding: EdgeInsets.zero,
                                                       minimumSize: Size.zero,
                                                     ),
@@ -919,7 +900,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => pdf_scan(doc, i, IP,false,"")));
+                            builder: (context) =>
+                                pdf_scan(doc, i, IP, false, "")));
                     print(path);
                   }
                 },
@@ -954,7 +936,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       Icons.camera_alt,
                       color: Colors.white,
                       size: 30,
-
                     ),
                     onPressed: () {
                       openCameraScanner(context, IP);

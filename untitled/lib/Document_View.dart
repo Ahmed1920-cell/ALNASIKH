@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:ALNASIKH/unmerge.dart';
 import 'package:document_scanner_flutter/configs/configs.dart';
 import 'package:document_scanner_flutter/document_scanner_flutter.dart';
 import 'package:file_picker/file_picker.dart';
@@ -31,15 +30,12 @@ class document_view extends StatefulWidget {
 class _document_viewState extends State<document_view> {
   List data = [];
   Sql DB = Sql();
-  unmerge DB_unmerge = unmerge();
   bool IsLoading = true;
 
   readData() async {
-    List<Map> response = await DB_unmerge.read("unmerge");
+    List<Map> response = await DB.read("unmerged");
     data.addAll(response);
-    data = data
-        .where((element) => element["MergeID"] == widget.MetaData["id"])
-        .toList();
+    data = data.where((element) => element["MergeID"] == widget.MetaData["id"]).toList();
     if (this.mounted) {
       setState(() {
         IsLoading = false;
@@ -132,8 +128,6 @@ class _document_viewState extends State<document_view> {
         color: Colors.deepPurpleAccent,
         foregroundColor: Colors.black,
         systemOverlayStyle: SystemUiOverlayStyle(
-          //<-- SEE HERE
-          // Status bar color
           statusBarColor: Colors.black,
           statusBarIconBrightness: Brightness.dark,
           statusBarBrightness: Brightness.dark,
@@ -155,8 +149,6 @@ class _document_viewState extends State<document_view> {
                       child: Container(
                           padding: EdgeInsets.fromLTRB(30, 10, 30, 10),
                           decoration: BoxDecoration(
-                            //color: Colors.blue,
-                            //color: Color.fromRGBO(218, 148, 11, 1.0),
                             color: Colors.blue,
                             borderRadius: BorderRadius.circular(25),
                           ),
@@ -196,16 +188,13 @@ class _document_viewState extends State<document_view> {
                                       topRight: Radius.circular(15)),
                                   child: Image.file(
                                     File(widget.MetaData["ImagePath"]),
-                                    //height: 200,
                                     width: 400,
-                                    //fit: BoxFit.cover,
                                   ),
                                 ),
                               )),
                           Container(
                             decoration: BoxDecoration(
                               color: Colors.black,
-                              //Colors.grey.withOpacity(0.3)
                             ),
                             child: Column(
                               children: [
@@ -278,7 +267,6 @@ class _document_viewState extends State<document_view> {
                         reverse: false,
                         padding: EdgeInsets.zero,
                         shrinkWrap: true,
-                        //physics: AlwaysScrollableScrollPhysics(),
                         physics: NeverScrollableScrollPhysics(),
                         itemCount: data.length,
                         itemBuilder: (context, i) => Container(
@@ -294,7 +282,6 @@ class _document_viewState extends State<document_view> {
                                 color: Colors.black,
                                 clipBehavior: Clip.hardEdge,
                                 shadowColor: Color.fromRGBO(218, 148, 11, 1.0),
-                                //shadowColor: Colors.blueAccent,
                                 elevation: 15,
                                 child: Column(children: [
                                   Padding(
@@ -311,16 +298,13 @@ class _document_viewState extends State<document_view> {
                                               topRight: Radius.circular(15)),
                                           child: Image.file(
                                             File(data[i]["ImagePath"]),
-                                            //height: 200,
                                             width: 400,
-                                            //fit: BoxFit.cover,
                                           ),
                                         ),
                                       )),
                                   Container(
                                     decoration: BoxDecoration(
                                       color: Colors.black,
-                                      //Colors.grey.withOpacity(0.3)
                                     ),
                                     child: Column(
                                       children: [
@@ -369,130 +353,65 @@ class _document_viewState extends State<document_view> {
                                               ElevatedButton(
                                                 onPressed: () => showDialog(
                                                     context: context,
-                                                    builder: (BuildContext
-                                                            ctx) =>
-                                                        AlertDialog(
+                                                    builder: (BuildContextctx) => AlertDialog(
                                                           elevation: 2,
-                                                          shadowColor:
-                                                              Colors.blue,
-                                                          clipBehavior:
-                                                              Clip.hardEdge,
-                                                          backgroundColor:
-                                                              Colors.black,
-                                                          title: const Text(
-                                                              'Delete'),
-                                                          titleTextStyle:
-                                                              TextStyle(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  fontSize: 18),
-                                                          content: const Text(
-                                                              'Do you want to delete this item'),
-                                                          contentTextStyle:
-                                                              TextStyle(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold),
+                                                          shadowColor: Colors.blue,
+                                                          clipBehavior: Clip.hardEdge,
+                                                          backgroundColor: Colors.black,
+                                                          title: const Text('Delete'),
+                                                          titleTextStyle: TextStyle(color: Colors.white, fontSize: 18),
+                                                          content: const Text('Do you want to delete this item'),
+                                                          contentTextStyle: TextStyle(
+                                                                  color: Colors.white,
+                                                                  fontWeight: FontWeight.bold),
                                                           actions: [
-                                                            TextButton(
-                                                              onPressed: () =>
-                                                                  Navigator.of(
-                                                                          c)
-                                                                      .pop(),
-                                                              child: const Text(
-                                                                'No',
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .blue),
+                                                            TextButton(onPressed: () =>
+                                                                  Navigator.of(c).pop(),
+                                                              child: const Text('No',
+                                                                style: TextStyle(color: Colors.blue),
                                                               ),
                                                             ),
-                                                            TextButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                int response =
-                                                                    await DB_unmerge.delete(
-                                                                        "unmerge",
-                                                                        "id =${data[i]["id"]} ");
-                                                                if (response >
-                                                                    0) {
-                                                                  data.removeWhere((element) =>
-                                                                      element[
-                                                                          "id"] ==
-                                                                      data[i][
-                                                                          "id"]);
-                                                                  setState(
-                                                                      () {});
+                                                            TextButton(onPressed: () async {
+                                                                int response = await DB.delete("unmerged", "id =${data[i]["id"]} ");
+                                                                if (response > 0) {
+                                                                  data.removeWhere((element) => element["id"] == data[i]["id"]);
+                                                                  setState(() {});
                                                                   var tempDir = Directory((Platform.isAndroid
                                                                               ? await getExternalStorageDirectory() //FOR ANDROID
                                                                               : await getApplicationSupportDirectory() //FOR IOS
                                                                           )!
                                                                           .path +
                                                                       '/recent/PDF');
-                                                                  var status =
-                                                                      await Permission
-                                                                          .storage
-                                                                          .status;
-                                                                  if (!status
-                                                                      .isGranted) {
-                                                                    await Permission
-                                                                        .storage
-                                                                        .request();
+                                                                  var status = await Permission.storage.status;
+                                                                  if (!status.isGranted) {
+                                                                    await Permission.storage.request();
                                                                   }
-                                                                  if ((await tempDir
-                                                                      .exists())) {
-                                                                    print(
-                                                                        "is exist");
+                                                                  if ((await tempDir.exists())) {
+                                                                    print("is exist");
                                                                   } else {
-                                                                    tempDir.create(
-                                                                        recursive:
-                                                                            true);
-                                                                    print(
-                                                                        "is create");
+                                                                    tempDir.create(recursive: true);
+                                                                    print("is create");
                                                                   }
-                                                                  var filename =
-                                                                      getTime();
-                                                                  var outputDirPath =
-                                                                      widget.MetaData[
-                                                                          "PdfPath"];
-                                                                  List<String> filesPath = data
-                                                                      .map((e) =>
-                                                                          e["PdfPath"]
-                                                                              .toString())
-                                                                      .toList();
-                                                                  print(
-                                                                      filesPath);
-                                                                  MergeMultiplePDFResponse
-                                                                      response =
-                                                                      await PdfMerger.mergeMultiplePDF(
-                                                                          paths:
-                                                                              filesPath,
-                                                                          outputDirPath:
-                                                                              outputDirPath);
-                                                                  Object pdf = response
-                                                                          .response
-                                                                      as Object;
+                                                                  var filename = getTime();
+                                                                  var outputDirPath = widget.MetaData["PdfPath"];
+                                                                  List<String> filesPath = data.map((e) => e["PdfPath"].toString()).toList();
+                                                                  print(filesPath);
+                                                                  MergeMultiplePDFResponse response = await PdfMerger.mergeMultiplePDF(paths: filesPath, outputDirPath: outputDirPath);
+                                                                  Object pdf = response.response as Object;
                                                                   print(pdf);
-                                                                  int res = await DB.update(
-                                                                      "alnasikh",
+                                                                  int res = await DB.update("alnasikh",
                                                                       {
-                                                                        "PdfPath":
-                                                                            pdf,
+                                                                        "PdfPath": pdf,
                                                                       },
                                                                       "id =${widget.MetaData["id"]} ");
                                                                   print(res);
                                                                   if (res > 0)
-                                                                    Navigator.pop(
-                                                                        c,
-                                                                        'Yes');
+                                                                    Navigator.pop(c, 'Yes');
                                                                 }
                                                               },
-                                                              child: const Text(
-                                                                'Yes',
+                                                              child: const Text('Yes',
                                                                 style: TextStyle(
-                                                                    color: Colors
-                                                                        .blue),
+                                                                    color: Colors.blue),
                                                               ),
                                                             ),
                                                           ],
@@ -524,8 +443,6 @@ class _document_viewState extends State<document_view> {
                             context: context,
                             builder: (context) {
                               return AlertDialog(
-                                //shape: CircleBorder(),
-                                //shadowColor: Colors.blue,
                                 elevation: 10,
                                 backgroundColor: Colors.black.withOpacity(0),
                                 actionsAlignment: MainAxisAlignment.center,

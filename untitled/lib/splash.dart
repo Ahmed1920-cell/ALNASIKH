@@ -17,7 +17,6 @@ class splashScreen extends StatelessWidget {
               height: 1000,),
             nextScreen: MyHomePage("192.168.1.1",false,""),
             splashTransition: SplashTransition.scaleTransition,
-            // pageTransitionType: PageTransitionType.scale,
             backgroundColor: Colors.black));
   }
 }

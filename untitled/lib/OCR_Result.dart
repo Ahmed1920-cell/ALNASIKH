@@ -1,4 +1,3 @@
-import 'package:ALNASIKH/unmerge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
@@ -30,7 +29,6 @@ class imageView extends StatefulWidget {
 
 class _imageViewState extends State<imageView> {
   Sql DB=Sql();
-  unmerge DB_unmerge=unmerge();
   var filename;
   _imageViewState(this.imageFile, this.IP);
   bool done=false;
@@ -117,8 +115,7 @@ String pdf_path="";
             iconTheme: IconThemeData(color: Colors.black),
             color: Colors.deepPurpleAccent,
             foregroundColor: Colors.black,
-            systemOverlayStyle: SystemUiOverlayStyle( //<-- SEE HERE
-              // Status bar color
+            systemOverlayStyle: SystemUiOverlayStyle(
               statusBarColor: Colors.black,
               statusBarIconBrightness: Brightness.dark,
               statusBarBrightness: Brightness.dark,
@@ -141,8 +138,6 @@ String pdf_path="";
 
                               padding: EdgeInsets.fromLTRB(30, 10, 30, 10),
                               decoration: BoxDecoration(
-                                //color: Colors.blue,
-                                //color: Color.fromRGBO(218, 148, 11, 1.0),
                                 color: Colors.blue,
                                 borderRadius: BorderRadius.circular(25),
                               ),
@@ -177,19 +172,14 @@ String pdf_path="";
                                       topRight: Radius.circular(15)),
                                   child: Image.file(
                                     imageFile,
-                                    //height: 200,
                                     width: 400,
-                                    //fit: BoxFit.cover,
                                   ),
                                 ),
                               )
                             ),
                             Container(
                               decoration: BoxDecoration(
-                                //border:Border.all(color: Colors.grey,width: 5),
-                               // borderRadius: BorderRadius.circular(25),
                                 color: chr==""?null:Colors.black,
-                                 //Colors.grey.withOpacity(0.3)
                               ),
                               child: chr==""?Padding(
                                 padding: const EdgeInsets.all(8.0),
@@ -207,27 +197,7 @@ String pdf_path="";
                                   if (!NotCopy)  Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      /*Tooltip(
-                                        margin: EdgeInsets.fromLTRB(90, 5, 0, 0),
-                                        textAlign: TextAlign.center,
-                                        key: tooltipkey,
-                                        message: 'Text Copied',
-                                        triggerMode: TooltipTriggerMode.manual,
-                                        showDuration: const Duration(seconds: 1),
-                                        child: ElevatedButton(
-                                          style: ButtonStyle(
-                                              backgroundColor:
-                                              MaterialStatePropertyAll(Colors.black)),
-                                          onPressed: () async{
-                                            tooltipkey.currentState?.ensureTooltipVisible();
-                                            Future.delayed(Duration(seconds: 2)).then((value) =>
-                                                tooltipkey.currentState?.deactivate());
-                                            await Clipboard.setData(ClipboardData(text: chr));
 
-                                          },
-                                          child: Icon(Icons.copy,size: 25,color: Colors.white,),
-                                        ),
-                                      ),*/
                                       ElevatedButton(
                                         style: ButtonStyle(
                                             backgroundColor:
@@ -246,7 +216,6 @@ String pdf_path="";
                                             backgroundColor:
                                             MaterialStatePropertyAll(Colors.black)),
                                         onPressed: NotCopy?(){}:() async {
-                                          //var tempDir = await getTemporaryDirectory();
                                           OpenFile.open(pdf_path);
                                         },
                                         child: Image.asset("assets/landing-pdf-converter.png",width: 30,height: 30,),),
@@ -311,13 +280,14 @@ String pdf_path="";
                   ?Colors.grey:Colors.green,
                 onPressed: NotCopy?(){Fluttertoast.showToast(msg: "This button is disabled until the OCR finishs",fontSize: 14,backgroundColor: Color.fromRGBO(
                     80, 80, 80, 1.0));}:() async{
+                try{
                   int timestamp = DateTime.now().millisecondsSinceEpoch;
                   DateTime tsdate = DateTime.fromMillisecondsSinceEpoch(timestamp);
                   String datetime = tsdate.year.toString() + "-" + tsdate.month.toString() + "-" + tsdate.day.toString();
-                File save_image=await saveImage(imageFile);
-                if(widget.merge){
-                  if(widget.data["Merge"]==0){
-                    DB_unmerge.insert("unmerge", {
+                  File save_image=await saveImage(imageFile);
+                  if(widget.merge){
+                    if(widget.data["Merge"]==0){
+                      DB.insert("unmerged", {
                         "filename":widget.data["filename"],
                         "PdfPath":widget.data["PdfPath"],
                         "ImagePath":widget.data["ImagePath"],
@@ -325,59 +295,65 @@ String pdf_path="";
                         "Sentence":widget.data["Sentence"],
                         "MergeID":widget.data["id"]
 
+                      });
+                    }
+                    DB.insert("unmerged", {
+                      "filename":filename,
+                      "PdfPath":pdf_path,
+                      "ImagePath":save_image.path,
+                      "DATE":datetime,
+                      "Sentence":chr,
+                      "MergeID":widget.data["id"]
+
                     });
+                    var tempDir=Directory((Platform.isAndroid
+                        ? await getExternalStorageDirectory() //FOR ANDROID
+                        : await getApplicationSupportDirectory() //FOR IOS
+                    )!
+                        .path + '/recent/PDF');
+                    var status = await Permission.storage.status;
+                    if (!status.isGranted) {
+                      await Permission.storage.request();
+                    }
+                    if ((await tempDir.exists())) {
+                      print("is exist");
+                    } else {
+                      tempDir.create(recursive: true);
+                      print("is create");
+                    }
+                    var outputDirPath=tempDir.path + "/merge_$filename.pdf";
+                    List<String> filesPath=[];
+                    filesPath.add(widget.data["PdfPath"]);
+                    filesPath.add(pdf_path);
+                    MergeMultiplePDFResponse response  = await PdfMerger.mergeMultiplePDF(paths: filesPath, outputDirPath: outputDirPath);
+                    Object pdf=response.response as Object;
+                    DB.update("alnasikh",{
+                      "PdfPath":pdf,
+                      "Merge":1
+                    },
+                        "id =${widget.data["id"]} "
+                    );
+
                   }
-                  DB_unmerge.insert("unmerge", {
+                  else{ DB.insert("alnasikh",{
                     "filename":filename,
                     "PdfPath":pdf_path,
                     "ImagePath":save_image.path,
                     "DATE":datetime,
                     "Sentence":chr,
-                    "MergeID":widget.data["id"]
-
-                  });
-                  var tempDir=Directory((Platform.isAndroid
-                      ? await getExternalStorageDirectory() //FOR ANDROID
-                      : await getApplicationSupportDirectory() //FOR IOS
-                  )!
-                      .path + '/recent/PDF');
-                  var status = await Permission.storage.status;
-                  if (!status.isGranted) {
-                    await Permission.storage.request();
+                    "Merge":0
                   }
-                  if ((await tempDir.exists())) {
-                    print("is exist");
-                  } else {
-                    tempDir.create(recursive: true);
-                    print("is create");
-                  }
-                  var outputDirPath=tempDir.path + "/merge_$filename.pdf";
-                  List<String> filesPath=[];
-                  filesPath.add(widget.data["PdfPath"]);
-                  filesPath.add(pdf_path);
-                  MergeMultiplePDFResponse response  = await PdfMerger.mergeMultiplePDF(paths: filesPath, outputDirPath: outputDirPath);
-                  Object pdf=response.response as Object;
-                  DB.update("alnasikh",{
-                    "PdfPath":pdf,
-                    "Merge":1
-                  },
-                      "id =${widget.data["id"]} "
-                  );
-
-                }
-               else{ DB.insert("alnasikh",{
-                  "filename":filename,
-                  "PdfPath":pdf_path,
-                  "ImagePath":save_image.path,
-                  "DATE":datetime,
-                  "Sentence":chr,
-                  "Merge":0
-                }
-                );}
+                  );}
                   Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_){
                     return MyHomePage(IP,done,pdf_path);
                   }),
-                    (route) => false,);
+                        (route) => false,);
+                }
+                catch (e){
+                  Fluttertoast.showToast(msg: "Try Again",fontSize: 14,backgroundColor: Color.fromRGBO(
+                      80, 80, 80, 1.0));
+                }
+
                 },
                 child: Icon(Icons.done_outline,
                 color: Colors.black,))
